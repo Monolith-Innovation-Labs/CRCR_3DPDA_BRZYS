@@ -134,11 +134,13 @@ local function load_settings()
 			local value = ui_mcm.get("crc/" .. key)
 			local original_type = type(old_value)
 
-			--- MCM returns string so we need to convert it to previous type
-			if original_type == "number" then
-				value = tonumber(value)
-			elseif original_type == "boolean" then
-				value = value == "true"
+			--- MCM sometimes changes the type of returned values to string, when this happens we need to convert it to the previous one.
+			if original_type ~= type(value) then
+				if original_type == "number" then
+					value = tonumber(value)
+				elseif original_type == "boolean" then
+					value = (value == "true")
+				end
 			end
 
 			config[key] = value

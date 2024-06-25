@@ -74,12 +74,12 @@ You can join the official Discord server in the Options menu!</eng>
 		<rus>Вы подключились к </rus>
 	</string>
 	<string id="client_topic">
-		<eng>Channel rules: </eng>
-		<rus>Правила канала: </rus>
+		<eng>Channel's topic: </eng>
+		<rus>Тема канала: </rus>
 	</string>
 	<string id="client_topic_change">
-		<eng>Updated channel rules: </eng>
-		<rus>Обновлённые правила: </rus>
+		<eng>Channel's topic update: </eng>
+		<rus>Обновление темы канала: </rus>
 	</string>
 	<string id="client_join">
 		<eng> has logged on</eng>

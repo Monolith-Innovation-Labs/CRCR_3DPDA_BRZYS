@@ -32,7 +32,7 @@ namespace Chernobyl_Relay_Chat
         public static string ManualFaction;
         public static string Name;
         public static string Password;
-        public static Dictionary<string, List<string>> blockListData = new Dictionary<string, List<string>>();
+        public static Dictionary<string, List<string>> blockListData = new Dictionary<string, List<string>>() { };
         public static bool SendDeath;
         public static bool ReceiveDeath;
         public static int DeathInterval;
@@ -102,16 +102,15 @@ namespace Chernobyl_Relay_Chat
                 ReceiveDeath = Convert.ToBoolean((string)registry.GetValue("ReceiveDeath", "True"));
                 DeathInterval = (int)registry.GetValue("DeathInterval", 0);
                 ShowTimestamps = Convert.ToBoolean((string)registry.GetValue("ShowTimestamps", "True"));
-                blockListData = new Dictionary<string, List<string>>();
                 try
                 {
-                    blockListData = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>((string)registry.GetValue("BlockList"));
+                    blockListData = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>((string)registry.GetValue("BlockListData"));
                 }
                 catch (Exception e) { 
                     blockListData = new Dictionary<string, List<string>>();
                     SaveBlockList();
                 }
-                BlockPayments = Convert.ToBoolean((string)registry.GetValue("BlockPayments", "False"));
+                BlockPayments = Convert.ToBoolean((string)registry.GetValue("BlockPayments", "True"));
                 DisableUnregisteredMessage = Convert.ToBoolean((string)registry.GetValue("DisableUnregisteredMessage", "False"));
                 SoundNotifications = Convert.ToBoolean((string)registry.GetValue("SoundNotifications", "True"));
 
@@ -185,7 +184,7 @@ namespace Chernobyl_Relay_Chat
 
         private static void SaveBlockList()
         {
-            registry.SetValue("BlockList", JsonConvert.SerializeObject(blockListData));
+            registry.SetValue("BlockListData", JsonConvert.SerializeObject(blockListData));
         }
 
         public static void addToBlockList(string nick, string host)

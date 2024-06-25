@@ -19,7 +19,7 @@ namespace Chernobyl_Relay_Chat
             Text = CRCStrings.Localize("crc_name") + " " + Application.ProductVersion;
             buttonSend.Text = CRCStrings.Localize("display_send");
             buttonOptions.Text = CRCStrings.Localize("display_options");
-            CRCOptions.Channel = CRCClient.lastChannel = CRCOptions.ChannelProxy();
+            CRCClient.lastChannel = CRCOptions.ChannelProxy();
             comboBoxChannel.SelectedIndex = channelToIndex[CRCOptions.Channel];
         }
 

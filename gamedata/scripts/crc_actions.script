@@ -116,7 +116,7 @@ actions = {
 		local setting, value = body:match("([^/]+)/(.+)")
         if setting == "ActorStatus" then
 			crc_io.send("Money/%s", db.actor:money())
-			crc_io.send("ConnLost/%s", crc_player_events.is_connection_lost())
+			crc_io.send("ConnLost/%s/None", crc_player_events.is_connection_lost())
 			crc_io.send("DEBUG/%s", DEV_DEBUG)
 		elseif setting == "Channel" then
 			crc_pda.get_ui():load_channel_from_settings(value)
@@ -129,6 +129,6 @@ actions = {
 	--- Receives user list
 	--- @param body string
 	Users = function (body)
-		crc_pda.get_ui():load_users(body:gmatch("([^/]+)%s=%s([^/]+)"))
+		crc_pda.get_ui():load_users(body:gmatch("([^/]+),([^/]+)%s=%s([^/]+)"))
 	end,
 }

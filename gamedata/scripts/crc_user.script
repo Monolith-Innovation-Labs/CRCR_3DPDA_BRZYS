@@ -1,14 +1,14 @@
 --| Texture ID-getting utility
---| By TKGP, Anchorpoint, Amon
+--| By TKGP, Anchorpoint, Amon, brzys
 
 info = "crc_icon_info"
 error = "crc_icon_error"
 unknown = "crc_icon_unknown"
-admin_icon = "crc_icon_admin"
+maintainer = "crc_icon_admin"
 
-local ADMIN = "Anchorpoint"
+local MAINTAINER = "brzys"
 local ORIGINAL_CREATOR = "TKGP"
-local DEVELOPER = "Amon"
+local DEVELOPER = { "Amon", "Anchorpoint" }
 
 factions = {
 	actor_bandit = 18,
@@ -31,8 +31,8 @@ factions = {
 --- @param faction string
 --- @return string
 function get_icon(name, faction)
-	if name == ADMIN then
-		return admin_icon
+	if name == MAINTAINER then
+		return maintainer
 	else
 		-- There's a reason for this extreme wank but I don't remember what it is
 		local oldRandom = math.random()
@@ -63,17 +63,29 @@ function get_faction(faction)
 	return  game.translate_string("crc_" .. faction) or game.translate_string("crc_actor_anonymous") or game.translate_string("crc_unknown")
 end
 
+--- Checks if the DEVELOPER array contains a user name
+--- @param name string
+--- @return boolean
+local function __is_developer(name)
+    for _, v in ipairs(DEVELOPER) do
+        if v == name then
+            return true
+        end
+    end
+    return false
+end
+
 --- Returns user's role or an empty string. Format "(ROLE)"
 --- @param name string
 --- @return string | nil
 function get_role(name)
 	local role = nil
 
-	if (name == ADMIN) then
+	if (name == MAINTAINER) then
 		role = game.translate_string("crc_role_admin");
 	elseif (name == ORIGINAL_CREATOR) then
 		role = game.translate_string("crc_role_creator");
-	elseif (name == DEVELOPER) then
+	elseif (__is_developer(name)) then
 		role = game.translate_string("crc_role_dev");
 	end
 

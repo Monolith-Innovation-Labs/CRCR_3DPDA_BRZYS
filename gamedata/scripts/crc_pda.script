@@ -382,7 +382,7 @@ end
 function CRCPda:load_users(users)
     self.users = {}
 
-    for k, v in users do
+    for k, _, v in users do
         self.users[k] = v
     end
 

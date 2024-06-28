@@ -8,20 +8,29 @@ local is_dead = false
 
 --- Updates the player's connection status
 function fake_conn_lost_update_client()
-	local cur_fake_conn_status = is_connection_lost()
+	local cur_fake_conn_status, reason = is_connection_lost()
     crc_pda:get_ui():connection_lost(cur_fake_conn_status)
 
 	--- update connection status
     if prev_fake_conn_status ~= cur_fake_conn_status then
 		prev_fake_conn_status = cur_fake_conn_status
-		crc_io.send("ConnLost/%s", cur_fake_conn_status)
+		crc_io.send("ConnLost/%s/%s", cur_fake_conn_status, reason)
 		printf("Connection status updated to client - "..tostring(cur_fake_conn_status))
 	end
 end
 
---- Returns true if the player is underground or there is an emission.
+--- Returns true if the player should lose connection to the CRCR, along with the reason
+--- @return boolean, string
 function is_connection_lost()
-	return level_weathers.bLevelUnderground or xr_conditions.surge_started()
+	if level_weathers.bLevelUnderground then
+		return true, "Underground"
+	end
+
+	if xr_conditions.surge_started() then
+		return true, "Surge"
+	end
+
+	return false, "None"
 end
 
 --- updates the EXE application information about the player's money

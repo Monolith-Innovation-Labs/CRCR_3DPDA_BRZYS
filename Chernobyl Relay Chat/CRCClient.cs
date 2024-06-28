@@ -8,9 +8,13 @@ using System.Windows.Forms;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
+
 #if DEBUG
 using System.Threading;
 #endif
+
+
 
 namespace Chernobyl_Relay_Chat
 {
@@ -21,6 +25,7 @@ namespace Chernobyl_Relay_Chat
         private static readonly Regex metaRx = new Regex("^(.*?)" + META_DELIM + "(.*)$");
         private static readonly Regex deathRx = new Regex("^(.*?)" + FAKE_DELIM + "(.*)$");
         private static readonly Regex userdataRx = new Regex("^(.+?)/(.+?)/(.+)$");
+        private static readonly Regex recvMoneyRx = new Regex("^([a-z_]+) pay " + META_DELIM + " (\\d+)$");
 
         private static IrcClient client = new IrcClient();
         public static Dictionary<string, Userdata> userData = new Dictionary<string, Userdata>();
@@ -28,7 +33,7 @@ namespace Chernobyl_Relay_Chat
         private static DateTime lastPay = new DateTime();
         private static DateTime lastMessage = new DateTime();
         private static bool lastStatus = false;
-        public static string lastName, lastChannel, prevChannel, lastQuery, lastFaction;
+        public static string lastName, lastChannel, prevChannel, lastQuery, lastFaction, nickBeforeRecover;
         private static bool retry = false;
 
 #if DEBUG
@@ -78,6 +83,19 @@ namespace Chernobyl_Relay_Chat
             debugThread.Join();
 #endif
         }
+        public static void ShowInformation(string message)
+        {
+            CRCDisplay.AddInformation(message);
+            CRCGame.AddInformation(message);
+        }
+
+        public static void NotifyAndLogin()
+        {
+            ShowInformation(String.Format(CRCStrings.Localize("try_identify_as"), nickBeforeRecover));
+            client.SendMessage(SendType.Message, "NickServ", "IDENTIFY " + CRCOptions.Password);
+            CRCOptions.Name = nickBeforeRecover;
+         
+        }
 
         public static void Stop()
         {
@@ -100,6 +118,7 @@ namespace Chernobyl_Relay_Chat
                     userData[CRCOptions.Name].Faction = CRCOptions.GetFaction();
                 client.SendMessage(SendType.CtcpReply, CRCOptions.ChannelProxy(), "AMOGUS " + UserDataUpdate());
                 lastFaction = CRCOptions.GetFaction();
+                UpdateUsers();
             }
         }
 
@@ -122,8 +141,7 @@ namespace Chernobyl_Relay_Chat
                     userData[CRCOptions.Name].IsInGame = CRCGame.IsInGame.ToString();
                 client.SendMessage(SendType.CtcpReply, CRCOptions.ChannelProxy(), "AMOGUS " + UserDataUpdate());
                 lastStatus = CRCGame.IsInGame;
-                CRCGame.UpdateUsers();
-                CRCDisplay.UpdateUsers();
+                UpdateUsers();
             }
         }
 
@@ -138,8 +156,7 @@ namespace Chernobyl_Relay_Chat
         {
             if ((DateTime.Now - lastMessage).TotalSeconds < 5)
             {
-                CRCGame.AddError(CRCStrings.Localize("crc_message_cooldown"));
-                CRCDisplay.AddError(CRCStrings.Localize("crc_message_cooldown"));
+                ShowError(CRCStrings.Localize("crc_message_cooldown"));
                 return;
             }
             else
@@ -155,33 +172,58 @@ namespace Chernobyl_Relay_Chat
         {
             string nick = CRCStrings.RandomName(CRCOptions.GameFaction);
             client.SendMessage(SendType.Message, CRCOptions.ChannelProxy(), nick + FAKE_DELIM + CRCOptions.GetFaction() + META_DELIM + message);
-            CRCDisplay.OnChannelMessage(nick, message);
-            CRCGame.OnChannelMessage(nick, CRCOptions.GameFaction, message);
+            ShowChannelMessage(nick, CRCOptions.GameFaction, message);
         }
 
         public static void SendQuery(string nick, string message)
         {
-            client.SendMessage(SendType.Message, nick, CRCOptions.GetFaction() + META_DELIM + message);
-            CRCDisplay.OnQueryMessage(CRCOptions.Name, nick, message);
-            CRCGame.OnQueryMessage(CRCOptions.Name, nick, CRCOptions.GetFaction(), message);
+            if (CRCOptions.blockListData.ContainsKey(nick))
+            {
+                CRCClient.ShowError(String.Format(CRCStrings.Localize("user_is_blocked"), nick));
+                return;
+            }
+
+            if (nick.Equals("NickServ")) {
+                client.SendMessage(SendType.Message, nick, message);
+            }
+            else
+            {
+                client.SendMessage(SendType.Message, nick, CRCOptions.GetFaction() + META_DELIM + message);
+            }
+            ShowQueryMessage(CRCOptions.Name, nick, CRCOptions.GameFaction, message);
+        }
+
+        private static void ShowQueryMessage(string from, string to, string faction, string message)
+        {
+            CRCDisplay.OnQueryMessage(from, to, message);
+            CRCGame.OnQueryMessage(from, to, CRCOptions.GetFaction(), message);
         }
 
         public static void SendMoney(string nick, string message)
         {
+            if (CRCOptions.blockListData.ContainsKey(nick))
+            {
+                CRCClient.ShowError(String.Format(CRCStrings.Localize("user_is_blocked"), nick));
+                return;
+            }
+            if (CRCOptions.BlockPayments)
+            {
+                ShowError(CRCStrings.Localize("payment_blocked"));
+                return;
+            }
+
             int amount;
             bool acceptable = int.TryParse(message, out amount);
             if ((DateTime.Now - lastPay).TotalSeconds < 120)
             {
-                CRCGame.AddError(CRCStrings.Localize("crc_money_cooldown"));
-                CRCDisplay.AddError(CRCStrings.Localize("crc_money_cooldown"));
+                ShowError(CRCStrings.Localize("crc_money_cooldown"));
                 return;
             }    
             if (acceptable && amount <=1000000)
             {
                 if (amount > CRCGame.ActorMoney)
                 {
-                    CRCGame.AddError(CRCStrings.Localize("crc_money_none"));
-                    CRCDisplay.AddError(CRCStrings.Localize("crc_money_none"));
+                    ShowError(CRCStrings.Localize("crc_money_none"));
                     return;
                 }
                 else 
@@ -194,8 +236,7 @@ namespace Chernobyl_Relay_Chat
             }
             else
             {
-                CRCGame.AddError(CRCStrings.Localize("crc_money_toohigh"));
-                CRCDisplay.AddError(CRCStrings.Localize("crc_money_toohigh"));
+                ShowError(CRCStrings.Localize("crc_money_toohigh"));
                 return;
             }
         }
@@ -204,6 +245,11 @@ namespace Chernobyl_Relay_Chat
         {
             if (lastQuery != null)
             {
+                if (CRCOptions.blockListData.ContainsKey(lastQuery))
+                {
+                    CRCClient.ShowError(String.Format(CRCStrings.Localize("user_is_blocked"), lastQuery));
+                    return false;
+                }
                 SendQuery(lastQuery, message);
                 return true;
             }
@@ -232,33 +278,93 @@ namespace Chernobyl_Relay_Chat
             else
             {
                 fakeNick = null;
-                faction = "actor_stalker";
+                faction = "actor_anonymous";
                 return message;
             }
         }
 
 
-
         private static void OnRawMessage(object sender, IrcEventArgs e)
         {
+            try
+            {
+                if (e.Data.Nick.Equals("NickServ"))
+                {
+                    HandleNickServMessage(e.Data.Message);
+                }
+            }
+            catch {
+                // ignore
+            }
 #if DEBUG
             debug?.AddRaw(e.Data.RawMessage);
 #endif
         }
 
+        private static void HandleNickServMessage(string message)
+        {
+            System.Console.WriteLine(message);
+            if (message.Equals("Password accepted -- you are now recognized."))
+            {
+                HandleLoggedIn();
+            }
+            else if (message.Equals("Services' hold on your nickname has been released."))
+            {
+                NotifyAndLogin();
+            }
+            else if (message.StartsWith("This nickname is registered and protected."))
+            {
+                // error handler will handle this, we just don't want to duplicate messages
+            }
+            else if (message.StartsWith("Password incorrect."))
+            {
+                HandleIncorrectPassword();
+            }
+            else if (message.StartsWith("Your nickname isn't registered."))
+            {
+                if (!CRCOptions.DisableUnregisteredMessage) {
+                    ShowInformation(CRCStrings.Localize("unregistered_nickname"));
+                }
+            }
+            else
+            {
+                ShowHighlightMessage("NickServ", CRCOptions.GameFaction, message);
+            }
+        }
+
+        private static void HandleIncorrectPassword()
+        {
+            ShowError(String.Format(CRCStrings.Localize("incorrect_password"), CRCOptions.Name));
+            userData.Remove(CRCOptions.Name);
+            lastName = nickBeforeRecover =  CRCOptions.Name = CRCOptions.Name + "_";
+            client.RfcNick(nickBeforeRecover);
+        }
+
+        private static void HandleLoggedIn()
+        {
+            ShowInformation(String.Format(CRCStrings.Localize("logged_in_as"), nickBeforeRecover));
+            CRCOptions.Name = nickBeforeRecover;
+            lastName = nickBeforeRecover;
+        }
+
         private static void OnCtcpRequest(object sender, CtcpEventArgs e)
         {
+            if (CRCOptions.isHostBlocked(e))
+            {
+                return;
+            }
             string from = e.Data.Nick;
-            switch(e.CtcpCommand.ToUpper())
+            System.Console.WriteLine(from + " CTCP: " + e.CtcpCommand.ToUpper());
+            switch (e.CtcpCommand.ToUpper())
             {
                 case "USERDATA":
                     client.SendMessage(SendType.CtcpReply, CRCOptions.ChannelProxy(), "AMOGUS " + UserDataUpdate());
                     break;
                 case "CLIENTINFO":
-                    client.SendMessage(SendType.CtcpReply, from, "CLIENTINFO Supported CTCP commands: CLIENTINFO FACTION PING VERSION");
+                    client.SendMessage(SendType.CtcpReply, from, "CLIENTINFO Supported CTCP commands: CLIENTINFO USERDATA PING VERSION");
                     break;
                 case "PING":
-                    client.SendMessage(SendType.CtcpReply, from, "PING " + e.CtcpParameter);
+                    client.SendMessage(SendType.CtcpReply, from, "PONG " + e.CtcpParameter);
                     break;
                 case "VERSION":
                     client.SendMessage(SendType.CtcpReply, from, "VERSION Chernobyl Relay Chat Rebirth " + Application.ProductVersion);
@@ -269,83 +375,105 @@ namespace Chernobyl_Relay_Chat
         private static void OnCtcpReply(object sender, CtcpEventArgs e)
         {
             string from = e.Data.Nick;
-            switch(e.CtcpCommand.ToUpper())
+            if (CRCOptions.isHostBlocked(e))
+            {
+                return;
+            }
+            switch (e.CtcpCommand.ToUpper())
             {
                 case "AMOGUS":
-                    Match userdataMatch = userdataRx.Match(e.CtcpParameter);
-                    if (userdataMatch.Success)
+                    try
                     {
-                        userData[userdataMatch.Groups[1].Value].User = userdataMatch.Groups[1].Value;
-                        userData[userdataMatch.Groups[1].Value].Faction = CRCStrings.ValidateFaction(userdataMatch.Groups[2].Value);
-                        userData[userdataMatch.Groups[1].Value].IsInGame = userdataMatch.Groups[3].Value;
-#if DEBUG
-                        var debug = JsonConvert.SerializeObject(userData);
-                        System.Diagnostics.Debug.WriteLine(debug);
-                        System.Diagnostics.Debug.WriteLine(userdataMatch.Groups[1].Value + " " + userdataMatch.Groups[2].Value + " " + userdataMatch.Groups[3].Value);
-#endif
+                        HandleCtcpAmogus(e);
                     }
-                    CRCGame.UpdateUsers();
-                    CRCDisplay.UpdateUsers();
+                    catch {
+                        // value probably malformed, skip silently 
+                    }
                     break;
             }
+        }
+
+        private static void HandleCtcpAmogus(CtcpEventArgs e)
+        {
+            Match userdataMatch = userdataRx.Match(e.CtcpParameter);
+            if (userdataMatch.Success)
+            {
+
+                userData[userdataMatch.Groups[1].Value].User = userdataMatch.Groups[1].Value;
+            }
+
+            userData[userdataMatch.Groups[1].Value].Faction = CRCStrings.ValidateFaction(userdataMatch.Groups[2].Value);
+            userData[userdataMatch.Groups[1].Value].IsInGame = userdataMatch.Groups[3].Value;
+#if DEBUG
+            var debug = JsonConvert.SerializeObject(userData);
+            System.Diagnostics.Debug.WriteLine(debug);
+            System.Diagnostics.Debug.WriteLine(userdataMatch.Groups[1].Value + " " + userdataMatch.Groups[2].Value + " " + userdataMatch.Groups[3].Value);
+#endif
+            UpdateUsers();
         }
 
         private static void OnConnected(object sender, EventArgs e)
         {
             userData.Clear();
-            lastName = CRCOptions.Name;
+            nickBeforeRecover = lastName = CRCOptions.Name;
             lastChannel = CRCOptions.ChannelProxy();
             lastFaction = CRCOptions.GetFaction();
             client.Login(CRCOptions.Name, CRCStrings.Localize("crc_name") + " " + Application.ProductVersion);
             client.RfcJoin(CRCOptions.ChannelProxy());
-            CRCDisplay.AddInformation(CRCStrings.Localize("welcome_msg"));
-            CRCGame.AddInformation(CRCStrings.Localize("welcome_msg"));
+            if (CRCOptions.Password.Length > 0)
+            {
+                NotifyAndLogin();
+            }
+            ShowInformation(CRCStrings.Localize("welcome_msg"));
         }
 
         private static void OnChannelActiveSynced(object sender, IrcEventArgs e)
         {
-            userData.Add(CRCOptions.Name, new Userdata { User = CRCOptions.Name, Faction = CRCOptions.GetFaction(), IsInGame = CRCGame.IsInGame.ToString() });
+            if (CRCOptions.isHostBlocked(e))
+            {
+                return;
+            }
+            try
+            {
+                userData.Add(CRCOptions.Name, new Userdata { User = CRCOptions.Name, Faction = CRCOptions.GetFaction(), IsInGame = CRCGame.IsInGame.ToString() });
+            }
+            catch {
+                System.Console.WriteLine("Could not add new userData for " + CRCOptions.Name);
+            }
             foreach (ChannelUser user in client.GetChannel(e.Data.Channel).Users.Values)
             {
                 if (!userData.ContainsKey(user.Nick))
-                    userData.Add(user.Nick, new Userdata { User = user.Nick, Faction = "actor_stalker", IsInGame = "False" });
+                    userData.Add(user.Nick, new Userdata { User = user.Nick, Faction = "actor_anonymous", IsInGame = "False" });
             }
             client.SendMessage(SendType.CtcpRequest, e.Data.Channel, "USERDATA");
             client.SendMessage(SendType.CtcpReply, e.Data.Channel, "AMOGUS " + UserDataUpdate());
             prevChannel = CRCOptions.Channel;
-            CRCDisplay.UpdateUsers();
-            CRCGame.UpdateUsers();
+            UpdateUsers();
         }
 
         private static void OnDisconnected(object sender, EventArgs e)
         {
             if (retry)
             {
-                string message = CRCStrings.Localize("client_reconnecting");
-                CRCDisplay.AddInformation(message);
-                CRCGame.AddInformation(message);
+                ShowInformation(CRCStrings.Localize("client_reconnecting"));
                 client.Connect(CRCOptions.Server, 6667);
             }
         }
 
         private static void OnTopic(object sender, TopicEventArgs e)
         {
-            string message = CRCStrings.Localize("client_topic") + e.Topic;
-            CRCDisplay.AddInformation(message);
-            CRCGame.AddInformation(message);
+            ShowInformation(CRCStrings.Localize("client_topic") + e.Topic);
         }
 
         private static void OnTopicChange(object sender, TopicChangeEventArgs e)
         {
-            string message = CRCStrings.Localize("client_topic_change") + e.NewTopic;
-            CRCDisplay.AddInformation(message);
-            CRCGame.AddInformation(message);
+            ShowInformation(CRCStrings.Localize("client_topic_change") + e.NewTopic);
         }
 
-        public static void OnSignalLost()
+        public static void OnSignalLost(string reason)
         {
             userData.Clear();
-            client.RfcPart(CRCOptions.ChannelProxy());
+            client.RfcPart(CRCOptions.ChannelProxy(), reason);
         }
 
         public static void OnSignalRestored()
@@ -359,6 +487,10 @@ namespace Chernobyl_Relay_Chat
 
         private static void OnChannelMessage(object sender, IrcEventArgs e)
         {
+            if (CRCOptions.isHostBlocked(e))
+            {
+                return;
+            }
             string fakeNick, faction;
             string message = GetMetadata(e.Data.Message, out fakeNick, out faction);
             // If some cheeky m8 just sends delimiters, ignore it
@@ -382,7 +514,7 @@ namespace Chernobyl_Relay_Chat
                     }
                     else
                     {
-                        faction = "actor_stalker";
+                        faction = "actor_anonymous";
                     }
                 }
                 else if (CRCOptions.ReceiveDeath && (DateTime.Now - lastDeath).TotalSeconds > CRCOptions.DeathInterval)
@@ -392,41 +524,60 @@ namespace Chernobyl_Relay_Chat
                 }
                 else
                     return;
+
                 if (message.Contains(CRCOptions.Name))
                 {
                     if (CRCOptions.SoundNotifications)
                         SystemSounds.Asterisk.Play();
-                    CRCDisplay.OnHighlightMessage(nick, message);
-                    CRCGame.OnHighlightMessage(nick, faction, message);
+                    ShowHighlightMessage(nick, faction, message);
                 }
                 else
                 {
-                    CRCDisplay.OnChannelMessage(nick, message);
-                    CRCGame.OnChannelMessage(nick, faction, message);
+                    ShowChannelMessage(nick, faction, message);
                 }
             }
         }
 
+        private static void ShowHighlightMessage(string nick, string faction, string message)
+        {
+            CRCDisplay.OnHighlightMessage(nick, message, faction);
+            CRCGame.OnHighlightMessage(nick, faction, message);
+        }
+
+        private static void ShowChannelMessage(string nick, string faction, string message)
+        {
+            CRCDisplay.OnChannelMessage(nick, message, faction);
+            CRCGame.OnChannelMessage(nick, faction, message);
+        }
+
         private static void OnQueryMessage(object sender, IrcEventArgs e)
         {
-            string raw = e.Data.Message;
-            bool check = raw.Contains("pay");
-            if (check)
+            if (CRCOptions.isHostBlocked(e))
             {
-                // Metadata should not be used in queries, just throw it out
-                string fakeNick, faction;
-                string message = GetMetadata(e.Data.Message, out fakeNick, out faction);
-                string nick = e.Data.Nick;
+                return;
+            }
+            string raw = e.Data.Message;
+            Match recvMoney = recvMoneyRx.Match(raw);
+
+            // Metadata should not be used in queries, just throw it out
+            string fakeNick, faction;
+            string message = GetMetadata(e.Data.Message, out fakeNick, out faction);
+            string nick = e.Data.Nick;
+            if (recvMoney.Success)
+            {
+                if (CRCOptions.BlockPayments)
+                {
+                    return;
+                }
                 CRCDisplay.OnMoneyRecv(nick, message);
                 CRCGame.OnMoneyRecv(nick, message);
             }
-            else
+            // we should only show messages that have content
+            else if (message.Length > 0)
             {
                 lastQuery = e.Data.Nick;
                 // Metadata should not be used in queries, just throw it out
-                string fakeNick, faction;
-                string message = GetMetadata(e.Data.Message, out fakeNick, out faction);
-                string nick = e.Data.Nick;
+                
                 if (userData.ContainsKey(nick) && CRCOptions.GetFaction() == "actor_isg")
                 {
                     faction = userData[nick].Faction;
@@ -443,8 +594,8 @@ namespace Chernobyl_Relay_Chat
                 {
                     faction = "actor_stalker";
                 }
-                CRCDisplay.OnQueryMessage(nick, CRCOptions.Name, message);
-                CRCGame.OnQueryMessage(nick, CRCOptions.Name, faction, message);
+                System.Console.WriteLine(String.Format("{0}({2}) -> {1}: '{3}'", nick, CRCOptions.Name, faction, message));
+                ShowQueryMessage(nick, CRCOptions.Name, faction, message);
             }
         }
 
@@ -452,50 +603,60 @@ namespace Chernobyl_Relay_Chat
         {
             if (e.Who != client.Nickname)
             {
-                userData.Add(e.Who, new Userdata { User = e.Who, Faction = "actor_stalker", IsInGame = "False" });
-                CRCDisplay.UpdateUsers();
-                CRCGame.UpdateUsers();
-                string message = e.Who + CRCStrings.Localize("client_join");
-                CRCDisplay.AddInformation(message);
-                CRCGame.AddInformation(message);
+                if (CRCOptions.isHostBlocked(e))
+                {
+                    return;
+                }
+                userData.Add(e.Who, new Userdata { User = e.Who, Faction = "actor_anonymous", IsInGame = "False" });
+                UpdateUsers();
+                ShowInformation(e.Who + CRCStrings.Localize("client_join"));
             }
             else
             {
                 CRCOptions.Name = e.Who;
-                string message = CRCStrings.Localize("client_connected") + ChannelToChannelName(CRCOptions.Channel);
-                CRCDisplay.AddInformation(message);
-                CRCGame.AddInformation(message);
+                ShowInformation(CRCStrings.Localize("client_connected") + ChannelToChannelName(CRCOptions.Channel));
                 CRCDisplay.OnConnected();
             }
         }
 
         private static void OnPart(object sender, PartEventArgs e)
         {
-            if (e.Who != CRCOptions.Name)
+            if (e.Who == CRCOptions.Name)
             {
-                userData.Remove(e.Who);
-                CRCDisplay.UpdateUsers();
-                CRCGame.UpdateUsers();
-                string message = e.Who + CRCStrings.Localize("client_part");
-                CRCDisplay.AddInformation(message);
-                CRCGame.AddInformation(message);
+                ShowInformation(CRCStrings.Localize("client_own_part") + ChannelToChannelName(prevChannel));
+                return;
             }
-            else
+            if (CRCOptions.isHostBlocked(e))
             {
-                string message = CRCStrings.Localize("client_own_part") + ChannelToChannelName(prevChannel);
-                CRCDisplay.AddInformation(message);
-                CRCGame.AddInformation(message);
+                return;
             }
+            userData.Remove(e.Who);
+            UpdateUsers();
+            if (e.PartMessage != null)
+            {
+                if (e.PartMessage == "Underground")
+                {
+                    ShowInformation(String.Format(CRCStrings.Localize("clinet_part_underground"), e.Who));
+                    return;
+                }
+                else if (e.PartMessage == "Surge")
+                {
+                    ShowInformation(String.Format(CRCStrings.Localize("clinet_part_surge"), e.Who));
+                    return;
+                }
+            }
+            ShowInformation(e.Who + CRCStrings.Localize("client_part"));
         }
 
         private static void OnQuit(object sender, QuitEventArgs e)
         {
             userData.Remove(e.Who);
-            CRCDisplay.UpdateUsers();
-            CRCGame.UpdateUsers();
-            string message = e.Who + CRCStrings.Localize("client_part");
-            CRCDisplay.AddInformation(message);
-            CRCGame.AddInformation(message);
+            UpdateUsers();
+            if (CRCOptions.isHostBlocked(e))
+            {
+                return;
+            }
+            ShowInformation(e.Who + CRCStrings.Localize("client_quit"));
         }
 
         private static void OnKick(object sender, KickEventArgs e)
@@ -504,42 +665,72 @@ namespace Chernobyl_Relay_Chat
             if (victim == CRCOptions.Name)
             {
                 userData.Clear();
-                string message = CRCStrings.Localize("client_got_kicked") + e.KickReason;
-                CRCDisplay.AddError(message);
-                CRCGame.AddError(message);
+                ShowError(CRCStrings.Localize("client_got_kicked") + e.KickReason);
                 CRCDisplay.OnGotKicked();
+            }
+            else if (CRCOptions.isHostBlocked(e))
+            {
+                return;
             }
             else
             {
                 userData.Remove(victim);
-                string message = victim + CRCStrings.Localize("client_kicked") + e.KickReason;
-                CRCDisplay.AddInformation(message);
-                CRCGame.AddInformation(message);
+                ShowInformation(victim + CRCStrings.Localize("client_kicked") + e.KickReason);
             }
-            CRCDisplay.UpdateUsers();
-            CRCGame.UpdateUsers();
+            UpdateUsers();
         }
 
         private static void OnNickChange(object sender, NickChangeEventArgs e)
         {
             string oldNick = e.OldNickname;
             string newNick = e.NewNickname;
-            userData.Add(newNick, new Userdata { User = newNick, Faction = "actor_stalker", IsInGame = "False" });
-            userData[newNick] = userData[oldNick];
-            userData.Remove(oldNick);
+#if DEBUG
+            System.Console.WriteLine("Nick change: '{0}' -> '{1}'", oldNick, newNick);
+#endif
+            if (CRCOptions.isHostBlocked(e))
+            {
+                CRCOptions.addToBlockList(e);
+                try
+                {
+                    userData.Remove(oldNick);
+                    UpdateUsers();
+                } catch
+                {
+
+                }
+                return;
+            }
+
+            try
+            {
+                userData.Add(newNick, new Userdata { User = newNick, Faction = "actor_anonymous", IsInGame = "False" });
+                userData[newNick] = userData[oldNick];
+                userData.Remove(oldNick);
+            }
+            catch {
+                if (String.IsNullOrEmpty(CRCOptions.Password)) {
+                    CRCOptions.Name = lastName;
+                }
+                return;
+            }
             if (newNick != client.Nickname)
             {
-                string message = oldNick + CRCStrings.Localize("client_nick_change") + newNick;
-                CRCDisplay.AddInformation(message);
-                CRCGame.AddInformation(message);
+                ShowInformation(oldNick + CRCStrings.Localize("client_nick_change") + newNick);
             }
             else
             {
                 CRCOptions.Name = newNick;
-                string message = CRCStrings.Localize("client_own_nick_change") + newNick;
-                CRCDisplay.AddInformation(message);
-                CRCGame.AddInformation(message);
+                ShowInformation(CRCStrings.Localize("client_own_nick_change") + newNick);
+                if (CRCOptions.Password.Length > 0)
+                {
+                    NotifyAndLogin();
+                }
             }
+            UpdateUsers();
+        }
+
+        public static void UpdateUsers()
+        {
             CRCDisplay.UpdateUsers();
             CRCGame.UpdateUsers();
         }
@@ -551,30 +742,40 @@ namespace Chernobyl_Relay_Chat
             {
                 case ReplyCode.ErrorBannedFromChannel:
                     message = CRCStrings.Localize("client_banned");
-                    CRCDisplay.AddError(message);
-                    CRCGame.AddError(message);
+                    ShowError(message);
                     break;
                 // What's the difference?
                 case ReplyCode.ErrorNicknameInUse:
                 case ReplyCode.ErrorNicknameCollision:
                     message = CRCStrings.Localize("client_nick_collision");
-                    CRCDisplay.AddError(message);
-                    CRCGame.AddError(message);
+                    ShowError(message);
+                    if (CRCOptions.Password.Length > 0) {
+                        lastName = CRCOptions.Name;
+                        string parameters = String.Format("{0} {1}", nickBeforeRecover, CRCOptions.Password);
+                        ShowInformation(String.Format(CRCStrings.Localize("recover_nick"), nickBeforeRecover));
+                        client.SendMessage(SendType.Message, "NickServ", String.Format("RECOVER {0}", parameters));
+                        client.SendMessage(SendType.Message, "NickServ", String.Format("RELEASE {0}", parameters));
+                        client.RfcNick(nickBeforeRecover);
+                    }
                     break;
                 // Don't care
                 case ReplyCode.ErrorNoMotd:
                 case ReplyCode.ErrorNotRegistered:
+                    System.Console.WriteLine("Not registered or no motd. " + e.Data.Message);
                     break;
                 case ReplyCode.ErrorNoSuchNickname:
-                    message = CRCStrings.Localize("error_no_such_nickname");
-                    CRCDisplay.AddError(message);
-                    CRCGame.AddError(message);
+                    ShowError(CRCStrings.Localize("error_no_such_nickname"));
                     break;
                 default:
-                    CRCDisplay.AddError(e.Data.Message);
-                    CRCGame.AddError(e.Data.Message);
+                    ShowError(e.Data.Message);
                     break;
             }
+        }
+
+        public static void ShowError(string message)
+        {
+            CRCDisplay.AddError(message);
+            CRCGame.AddError(message);
         }
 
         private static string ChannelToChannelName(string rawChannel)
@@ -599,6 +800,11 @@ namespace Chernobyl_Relay_Chat
         {
             string userDataUpdate = CRCOptions.Name + "/" + CRCOptions.GetFaction() + "/" + CRCGame.IsInGame.ToString();
             return userDataUpdate;
+        }
+
+        internal static void askAboutNames()
+        {
+            client.RfcNames(CRCOptions.Channel);
         }
     }
 

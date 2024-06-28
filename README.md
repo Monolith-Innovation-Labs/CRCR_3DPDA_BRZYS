@@ -1,17 +1,41 @@
-# DISCLAIMER  
-Original mod by TKGP. Please, hit me up if you are against me trying to revive this project and want me to shut it down!
-
 # Chernobyl Relay Chat Rebirth
 An IRC-based chat app for Anomaly, originally developed by TKGP for CoC. Features an independent client as well as in-game chat, automatic death messages, and compatibility with all other addons.
 
+# [Download](https://github.com/8r2y5/Chernobyl-Relay-Chat-Rebirth/releases/tag/0.7.1)
+
+## Note
+Currently (since [0.5.0](https://github.com/8r2y5/Chernobyl-Relay-Chat-Rebirth/releases/tag/0.5.0) release) russian localisation is done using translator.
+
+# Features
+## Faction colors in chat
+![Preview](./preview/faction_colors.png)
+
+## Ability to identify with IRC server
+You can provide password in `Options`.  
+To register your nick type, `/msg NickServ REGISTER [password] [email]` and follow the instructions.
+
+## Commands
+| Command    | Description                                     | Usage                   | Note                                                                           |
+|------------|-------------------------------------------------|-------------------------|--------------------------------------------------------------------------------|
+| `/block`   | Blocks interactions/messages with provided user | `/block [nick]`         |                                                                                |
+| `/unblock` | Unblocks previously blocked user                | `/unblock [nick]`       |                                                                                |
+| `/list`    | Shows list of currently blocked users           | `/list`                 |                                                                                |
+| `/help`    | Shows help message for command                  | `/help block`           |                                                                                |
+| `/commands` | Shows avaliable commands                        | `/commands`             |                                                                                |
+| `/msg`      | Sends private message to user                   | `/msg [nick] [message]` |                                                                                |
+| `/nick` | Changes you nicname in chat.                    | `/nick [new nick]`       | Nick cannot contain space, it's IRC limitation                                 |
+| `/reply` | Replyes to last private message/dm | `/reply [message]` |                                                                                |
+| `/r` | Alias for `/reply` | `/r [message]` |                                                                                |
+| `/pay` | Transfers money to another user | `/pay [nick] [amount]` | Both need to be in-game. There is option to block money transfer in `Options`. |                       |
+
 # Official CRCR Discord Server
-[Join](https://discord.gg/crcr) to get help, leave feedback or just to hang out! 
+[Join](https://discord.gg/KjNHXCkHr9) to get help, leave feedback or just to hang out! 
 
 # Installation
 1. Install the [.NET framework](https://www.microsoft.com/net/download/framework) if you don't have it already  
 2. Extract the contents of the CRCR.zip wherever you like
 3. Copy the included gamedata folder to your game directory
-4. (Optional) Install the [Anomaly Mod Configuration Menu](https://www.moddb.com/mods/stalker-anomaly/addons/anomaly-mod-configuration-menu) for advanve mod configuration
+4. (Optional) Install the [Anomaly Mod Configuration Menu](https://www.moddb.com/mods/stalker-anomaly/addons/anomaly-mod-configuration-menu) for advanced mod configuration
 
 # Compatibility with non-US keyboard layouts
 Stalker reads the key position on the keyboard ([DIK](https://community.bistudio.com/wiki/DIK_KeyCodes)) rather than its value after being pressed. For example, when using AZERTY, you don't have to manually change W to Z; you simply press Z, and the game interprets it as W. However, a problem arises when typing in the chat. You need to specifically remember which character on your AZERTY keyboard corresponds to the QWERTY character.
@@ -29,15 +53,13 @@ Once playing, press Enter (by default) to bring up the chat interface and Enter 
 You may use text commands from the game or client by starting with a /. Use /commands to see all available commands.  
 
 # What's Planned  
-I AM CURRENTLY LOOKING FOR ANYONE WHO IS WILLING TO HELP WITH DEVELOPING THIS MOD!  
-IF ANYONE IS WILLING TO HELP WITH ANY OF THIS FEATURES, FEEL FREE TO HIT ME ON DISCORD: anchorpoint#6144
 - [ ] Advanced anti-spam and moderation features
 - [ ] New interface
 - [ ] (possibly) Own private IRC-server
 - [x] New In-game chat GUI and (possibly) integrating it in Anomaly's 3D PDA
-- [ ] G.A.M.M.A modpack compatibility
+- [x] G.A.M.M.A modpack compatibility
 
-# Credits
+# Original Credits
 TKGP: Original CRC  
 EveNaari: Huge help with C#, Microsoft Visual Studio  
 GitHub: Octokit  

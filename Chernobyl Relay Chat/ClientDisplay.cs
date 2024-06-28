@@ -105,7 +105,7 @@ namespace Chernobyl_Relay_Chat
         private void richTextBoxMessages_LinkClicked(object sender, LinkClickedEventArgs e)
         {
             // Apparently safer than just passing the link
-            Process.Start("explorer.exe", e.LinkText);
+            Process.Start(e.LinkText);
         }
 
 
@@ -176,16 +176,21 @@ namespace Chernobyl_Relay_Chat
             });
         }
 
-        public void AddHighlightMessage(string nick, string message)
+        public void AddMessage(string nick, string message, string nick_faction)
+        {
+            AddMessage(nick, message, GetFactionColor(nick_faction));
+        }
+
+        public void AddHighlightMessage(string nick, string message, string faction_name)
         {
             Invoke(() =>
             {
-                AddMessage(nick, message, Color.Black);
+                AddMessage(nick, message, GetFactionColor(faction_name));
                 int start = richTextBoxMessages.GetFirstCharIndexOfCurrentLine();
                 int length = richTextBoxMessages.TextLength - start;
                 richTextBoxMessages.Select(start, length);
                 richTextBoxMessages.SelectionBackColor = Color.Yellow;
-                richTextBoxMessages.Select(0, 0);
+                richTextBoxMessages.Select(richTextBoxMessages.TextLength, richTextBoxMessages.TextLength);
                 richTextBoxMessages.SelectionBackColor = Color.White;
             });
         }
@@ -196,17 +201,26 @@ namespace Chernobyl_Relay_Chat
             {
                 if (textBoxUsers.Text.Contains(user))
                 {
-                    if (CRCClient.userData.ContainsKey(user) && CRCClient.userData[user].IsInGame == "True")
+                    if (CRCClient.userData.ContainsKey(user))
                     {
+#if DEBUG
+                        string faction_name = CRCClient.userData[user].Faction.ToString();
+                        Color faction_color = GetFactionColor(faction_name);
+                        System.Console.WriteLine(user + " -> '" + faction_name + "': " + faction_color.ToString());
+#endif
                         textBoxUsers.Select(textBoxUsers.Text.IndexOf(user), user.Length);
-                        textBoxUsers.SelectedText = "⦿ " + user;
-                    }
-                    else
-                    {
+                        if (CRCClient.userData[user].IsInGame == "True")
+                        {
+                            textBoxUsers.SelectedText = "⦿ " + user;
+                        }
+                        else
+                        {
+                            textBoxUsers.SelectedText = "⦾ " + user;
+                        }
                         textBoxUsers.Select(textBoxUsers.Text.IndexOf(user), user.Length);
-                        textBoxUsers.SelectedText = "⦾ " + user;
+                        textBoxUsers.SelectionColor = GetFactionColor(CRCClient.userData[user].Faction.ToString());
+                        textBoxUsers.SelectionFont = boldFont;
                     }
-
                 }
                 else return;
             }
@@ -221,6 +235,26 @@ namespace Chernobyl_Relay_Chat
             {
                 textBoxUsers.Select(match.Index, match.Length);
                 textBoxUsers.SelectionColor = Color.Red;
+            }
+        }
+
+        public Color GetFactionColor(string v)
+        {
+            switch (v)
+            {
+                case "actor_stalker": return Color.DarkGoldenrod;
+                case "actor_csky": return Color.DodgerBlue;
+                case "actor_dolg": return Color.Firebrick;
+                case "actor_ecolog": return Color.Chocolate;
+                case "actor_freedom": return Color.ForestGreen;
+                case "actor_killer": return Color.DarkBlue;
+                case "actor_monolith": return Color.DarkOrchid;
+                case "actor_greh": return Color.Sienna;
+                case "actor_bandit": return Color.RosyBrown;
+                case "actor_army": return Color.DarkSeaGreen;
+                case "actor_renegade": return Color.LimeGreen;
+                case "actor_isg": return Color.Salmon;
+                default: return Color.Black;
             }
         }
 

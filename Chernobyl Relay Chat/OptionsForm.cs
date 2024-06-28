@@ -20,7 +20,10 @@ namespace Chernobyl_Relay_Chat
             radioButtonFactionAuto.Text = CRCStrings.Localize("options_auto_faction");
             radioButtonFactionManual.Text = CRCStrings.Localize("options_manual_faction");
             labelName.Text = CRCStrings.Localize("options_name");
+            labelPassword.Text = CRCStrings.Localize("options_password");
             buttonRandom.Text = CRCStrings.Localize("options_name_random");
+            checkBoxBlockPayment.Text = CRCStrings.Localize("options_disable_payment");
+            checkBoxDisableUnregisteredMessage.Text = CRCStrings.Localize("options_disable_unregistered");
             checkBoxTimestamps.Text = CRCStrings.Localize("options_timestamps");
             checkBoxDeathSend.Text = CRCStrings.Localize("options_send_deaths");
             checkBoxDeathReceive.Text = CRCStrings.Localize("options_receive_deaths");
@@ -45,7 +48,10 @@ namespace Chernobyl_Relay_Chat
             radioButtonFactionAuto.Checked = CRCOptions.AutoFaction;
             radioButtonFactionManual.Checked = !CRCOptions.AutoFaction;
             textBoxName.Text = CRCOptions.Name;
+            textBoxPassword.Text = CRCOptions.Password;
             comboBoxFaction.SelectedIndex = factionToIndex[CRCOptions.ManualFaction];
+            checkBoxBlockPayment.Checked = CRCOptions.BlockPayments;
+            checkBoxDisableUnregisteredMessage.Checked = CRCOptions.DisableUnregisteredMessage;
             checkBoxTimestamps.Checked = CRCOptions.ShowTimestamps;
             checkBoxDeathSend.Checked = CRCOptions.SendDeath;
             checkBoxDeathReceive.Checked = CRCOptions.ReceiveDeath;
@@ -62,6 +68,11 @@ namespace Chernobyl_Relay_Chat
         {
             string name = textBoxName.Text.Replace(' ', '_');
             string result = CRCStrings.ValidateNick(name);
+            string assword = textBoxPassword.Text;
+            if (assword.IndexOf(' ') > 0) {
+                MessageBox.Show(assword, CRCStrings.Localize("crc_error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             if (result != null)
             {
                 MessageBox.Show(result, CRCStrings.Localize("crc_error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -78,6 +89,7 @@ namespace Chernobyl_Relay_Chat
             CRCOptions.AutoFaction = radioButtonFactionAuto.Checked;
             CRCOptions.ManualFaction = indexToFaction[comboBoxFaction.SelectedIndex];
             CRCOptions.Name = name;
+            CRCOptions.Password = assword;
             CRCOptions.ShowTimestamps = checkBoxTimestamps.Checked;
             CRCOptions.SendDeath = checkBoxDeathSend.Checked;
             CRCOptions.ReceiveDeath = checkBoxDeathReceive.Checked;
@@ -88,6 +100,8 @@ namespace Chernobyl_Relay_Chat
             CRCOptions.ChatKey = textBoxChatKey.Text;
             CRCOptions.NewsSound = checkBoxNewsSound.Checked;
             CRCOptions.CloseChat = checkBoxCloseChat.Checked;
+            CRCOptions.DisableUnregisteredMessage = checkBoxDisableUnregisteredMessage.Checked;
+            CRCOptions.BlockPayments = checkBoxBlockPayment.Checked;
 
             CRCOptions.Save();
             CRCClient.UpdateSettings();
@@ -177,7 +191,7 @@ namespace Chernobyl_Relay_Chat
 
         private void linkLabelDiscord_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("explorer.exe", "https://discord.gg/m9yfGYq8Sy");
+            Process.Start("explorer.exe", "https://discord.gg/KjNHXCkHr9");
         }
     }
 }

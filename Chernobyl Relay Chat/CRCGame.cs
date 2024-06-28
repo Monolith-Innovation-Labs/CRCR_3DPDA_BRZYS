@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Octokit;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,7 +13,7 @@ namespace Chernobyl_Relay_Chat
 {
     class CRCGame
     {
-        private const int SCRIPT_VERSION = 6;
+        private const int SCRIPT_VERSION = 7;
         public static bool DEBUG = false;
         public static int ActorMoney = 0;
         public static bool IsInGame = false;
@@ -22,6 +23,7 @@ namespace Chernobyl_Relay_Chat
         private static readonly Regex outputRx = new Regex("^(.+?)(?:/(.+))?$");
         private static readonly Regex messageRx = new Regex("^(.+?)/(.+)$");
         private static readonly Regex deathRx = new Regex("^(.+?)/(.+?)/(.+?)/(.+)$");
+        private static readonly Regex connLostRx = new Regex("^(.+?)/(.+)$");
 
         public static bool disable = false;
         public static int processID = -1;
@@ -74,17 +76,23 @@ namespace Chernobyl_Relay_Chat
                 {
                     if (process.MainWindowTitle == "S.T.A.L.K.E.R.: Anomaly")
                     {
-                        string path = Path.GetDirectoryName(process.GetProcessPath());
-                        if (File.Exists(path + CRCOptions.InPath))
-                        {
-                            gamePath = path;
-                            firstClear = false;
-                            processID = process.Id;
-                            IsInGame = true;
-                            CRCClient.UpdateStatus();
-                            UpdateSettings();
-                            break;
+                        try {
+                            string path = Path.GetDirectoryName(process.GetProcessPath());
+                            if (File.Exists(path + CRCOptions.InPath))
+                            {
+                                gamePath = path;
+                                firstClear = false;
+                                processID = process.Id;
+                                IsInGame = true;
+                                CRCClient.UpdateStatus();
+                                UpdateSettings();
+                                break;
+                            }
                         }
+                        catch 
+                        {
+                            continue;
+                        }                        
                     }
                 }
             }
@@ -179,13 +187,14 @@ namespace Chernobyl_Relay_Chat
                     }
                     else if (type == "ConnLost")
                     {
-                        if (typeMatch.Groups[2].Value == "true" && FakeConnLost == false)
+                        Match connLostMatch = connLostRx.Match(typeMatch.Groups[2].Value);
+                        if (connLostMatch.Groups[1].Value == "true" && FakeConnLost == false)
                         {
-                                CRCClient.OnSignalLost();
-                                FakeConnLost = true;
-                                new ConnLostForm().ShowDialog(ClientDisplay.staticVar);
+                            CRCClient.OnSignalLost(connLostMatch.Groups[2].Value);
+                            FakeConnLost = true;
+                            new ConnLostForm().ShowDialog(ClientDisplay.staticVar);
                         }
-                        else if (typeMatch.Groups[2].Value == "false")
+                        else if (connLostMatch.Groups[1].Value == "false")
                         {
                             if (ConnLostForm.staticVar != null)
                             {
@@ -267,7 +276,9 @@ namespace Chernobyl_Relay_Chat
             string UserStatus = "";
             foreach (KeyValuePair<string, Userdata> item in CRCClient.userData)
             {
-                UserStatus += item.Key + " = " + item.Value.IsInGame + "/";
+                if (!CRCOptions.IsNickBlocked(item.Key)) {
+                    UserStatus += item.Key + ',' + item.Value.Faction + " = " + item.Value.IsInGame + "/";
+                }
             }
             SendToGame("Users/" + UserStatus.TrimEnd('/'));
 #if DEBUG

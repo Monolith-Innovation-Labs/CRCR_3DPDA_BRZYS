@@ -356,14 +356,23 @@ function CRCPda:add_message(icon, title, text, author)
 	else
 		--- do not display message if the user filters it out
 		if self:__should_message_be_displayed(message) then
-			-- TODO -> Change give_game_news to custom news implementation
-			db.actor:give_game_news(message.title, message.text, icon, 0, crc_config.get().news_duration)
+			--- skip notification if pda isn't equipped
+			if self:__is_pda_equipped() then
+				-- TODO -> Change give_game_news to custom news implementation
+				db.actor:give_game_news(message.title, message.text, icon, 0, crc_config.get().news_duration)
+			end
 		end
 	end
 
     if crc_config.get().news_sound then
 		xr_sound.set_sound_play(db.actor:id(), self:sound_picker(title))
 	end
+end
+
+--- returns true if pda is equipped
+--- @return boolean
+function CRCPda:__is_pda_equipped()
+	return db.actor:item_in_slot(8)
 end
 
 --- Saves the player's icon, for later use 

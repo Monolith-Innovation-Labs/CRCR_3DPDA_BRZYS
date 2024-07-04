@@ -38,11 +38,14 @@ namespace Chernobyl_Relay_Chat
         public static int DeathInterval;
         public static bool ShowTimestamps;
         public static bool SoundNotifications;
-        public static bool BlockPayments;
+        public static bool BlockMoneyTransfer;
         public static bool DisableUnregisteredMessage;
+        public static bool DisconnectWhenBlowoutOrUnderground;
+        private static int MinimumDeathInterval = 15;
 
         public static int NewsDuration;
         public static string ChatKey;
+        public static string NickAutoCompleteKey;
         public static bool NewsSound;
         public static bool CloseChat;
 
@@ -100,7 +103,14 @@ namespace Chernobyl_Relay_Chat
                 Password = (string)registry.GetValue("Password", "");
                 SendDeath = Convert.ToBoolean((string)registry.GetValue("SendDeath", "True"));
                 ReceiveDeath = Convert.ToBoolean((string)registry.GetValue("ReceiveDeath", "True"));
-                DeathInterval = (int)registry.GetValue("DeathInterval", 0);
+
+                DeathInterval = (int)registry.GetValue("DeathInterval", MinimumDeathInterval);
+                if (DeathInterval < MinimumDeathInterval)
+                {
+                    DeathInterval = MinimumDeathInterval;
+                    registry.SetValue("DeathInterval", DeathInterval);
+                }
+
                 ShowTimestamps = Convert.ToBoolean((string)registry.GetValue("ShowTimestamps", "True"));
                 try
                 {
@@ -110,12 +120,14 @@ namespace Chernobyl_Relay_Chat
                     blockListData = new Dictionary<string, List<string>>();
                     SaveBlockList();
                 }
-                BlockPayments = Convert.ToBoolean((string)registry.GetValue("BlockPayments", "True"));
+                BlockMoneyTransfer = Convert.ToBoolean((string)registry.GetValue("BlockMoneyTransfer", "True"));
                 DisableUnregisteredMessage = Convert.ToBoolean((string)registry.GetValue("DisableUnregisteredMessage", "False"));
                 SoundNotifications = Convert.ToBoolean((string)registry.GetValue("SoundNotifications", "True"));
+                DisconnectWhenBlowoutOrUnderground = Convert.ToBoolean((string)registry.GetValue("DisconnectWhenBlowoutOrUnderground", "True"));
 
                 NewsDuration = (int)registry.GetValue("NewsDuration", 10);
                 ChatKey = (string)registry.GetValue("ChatKey", "RETURN");
+                NickAutoCompleteKey = (string)registry.GetValue("NickAutoCompleteKey", "TAB");
                 NewsSound = Convert.ToBoolean((string)registry.GetValue("NewsSound", "True"));
                 CloseChat = Convert.ToBoolean((string)registry.GetValue("CloseChat", "True"));
 
@@ -144,16 +156,23 @@ namespace Chernobyl_Relay_Chat
             registry.SetValue("Password", Password);
             registry.SetValue("SendDeath", SendDeath);
             registry.SetValue("ReceiveDeath", ReceiveDeath);
+
+            if (DeathInterval < MinimumDeathInterval)
+            {
+                DeathInterval = MinimumDeathInterval;
+            }
             registry.SetValue("DeathInterval", DeathInterval);
             registry.SetValue("ShowTimestamps", ShowTimestamps);
             registry.SetValue("SoundNotifications", SoundNotifications);
             registry.SetValue("DisableUnregisteredMessage", DisableUnregisteredMessage);
-            registry.SetValue("BlockPayments", BlockPayments);
+            registry.SetValue("BlockMoneyTransfer", BlockMoneyTransfer);
+            registry.SetValue("DisconnectWhenBlowoutOrUnderground", DisconnectWhenBlowoutOrUnderground);
 
             SaveBlockList();
             registry.SetValue("NewsDuration", NewsDuration);
 
             registry.SetValue("ChatKey", ChatKey);
+            registry.SetValue("NickAutoCompleteKey", NickAutoCompleteKey);
             registry.SetValue("NewsSound", NewsSound);
             registry.SetValue("CloseChat", CloseChat);
         }

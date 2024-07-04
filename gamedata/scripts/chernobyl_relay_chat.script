@@ -2,9 +2,10 @@
 --| Chernobyl Relay Chat
 --| Interface for external application
 --| By TKGP
---| CRCR additions by Anchorpoint and brzys
+--| CRCR additions by Anchorpoint
+--| changes after 0.5.0 brzys
 
-local SCRIPT_VERSION = 7
+local SCRIPT_VERSION = 8
 
 -- Constants
 local UPDATE_INTERVAL = 250
@@ -20,9 +21,11 @@ local INGAME_COLOR = "%c[255,128,255,154]"
 local option = {
 	newsDuration = 10000,
 	chatKey = DIK_keys.DIK_RETURN,
+	nickAutoCompleteKey = DIK_keys.DIK_TAB,
 	newsSound = true,
 	closeChat = true,
-	}
+	disconnectWhenBlowoutOrUnderground = true,
+}
 
 -- Etc
 local config = system_ini()
@@ -147,6 +150,8 @@ local inputActions = {
 			option.newsDuration = tonumber(value)
 		elseif setting == "ChatKey" then
 			option.chatKey = DIK_keys[value]
+		elseif setting == "NickAutoCompleteKey" then
+			option.nickAutoCompleteKey = DIK_keys[value]
 		elseif setting == "NewsSound" then
 			option.newsSound = value == "True"
 		elseif setting == "CloseChat" then
@@ -157,6 +162,8 @@ local inputActions = {
 			send("DEBUG/%s", DEV_DEBUG)
 		elseif setting == "Channel" then
 			prevChannel = tonumber(value)
+		elseif setting == "DisconnectWhenBlowoutOrUnderground" then
+            option.disconnectWhenBlowoutOrUnderground = value == "True"
 		end
 	end,
 	Users = function (body)
@@ -234,7 +241,7 @@ local function onDeath(whoID)
 		if class == "AI_STL_S" then
 			class = who:community()
 		end
-	end	
+	end
 	if not isDead then --possible fix for death message spam
 		send("Death/%s/%s/%s/%s", db.actor:character_community(), level.name(), class:upper(), section)
 		isDead = true
@@ -282,11 +289,14 @@ end
 
 function fake_conn_lost()
 	if (level_weathers.bLevelUnderground or xr_conditions.surge_started()) then
-		if chatBox then
-			ChatBox:Cancel()
-		end
-		return true
-	end
+	    if option.disconnectWhenBlowoutOrUnderground then
+            if chatBox then
+                ChatBox:Cancel()
+            end
+            return true
+        end
+        return false
+    end
 	return false
 end
 
@@ -306,7 +316,7 @@ function load_state(m_data)
 end
 
 function actor_on_net_destroy()
-	if chatBox then
+	if chatBox and option.disconnectWhenBlowoutOrUnderground then
 		ChatBox:Cancel()
 	end	
 end
@@ -386,6 +396,8 @@ function ChatBox:OnKeyboard(dik, keyboard_action)
 		elseif dik == DIK_keys.DIK_ESCAPE then
 			currChannel = self.currChannel
 			self:Cancel()
+		elseif dik == option.nickAutoCompleteKey then
+            self:completeNick()
 		end
 	end
 	return true
@@ -447,4 +459,18 @@ function ChatBox:Cancel()
 	chatBox:HideDialog()
 	Unregister_UI("ChatBox") --possible fix to a stack trace: 0x000000014014D6CA (moved this BEFORE = nil)
 	chatBox = nil
+end
+
+function ChatBox:completeNick()
+    local text = self.editBox:GetText()
+    local nick = text:match("@(%w+)")
+    if nick then
+        for k, v in pairs(users) do
+            if k:lower():find(nick:lower()) then
+                text = text:gsub("@"..nick, "@"..k)
+                self.editBox:SetText(text)
+                break
+            end
+        end
+    end
 end

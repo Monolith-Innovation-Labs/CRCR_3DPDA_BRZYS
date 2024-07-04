@@ -32,6 +32,10 @@ You can join the official Discord server in the Options menu!</eng>
 		<eng>Information</eng>
 		<rus>Информация</rus>
 	</string>
+	<string id="crc_warning">
+		<eng>Warning</eng>
+		<rus>Предупреждение</rus>
+	</string>
 	<string id="crc_money">
 		<eng> has sent some money to </eng>
 		<rus> отправил денег </rus>
@@ -224,6 +228,10 @@ You can join the official Discord server in the Options menu!</eng>
 		<eng>Random</eng>
 		<rus>Случайно</rus>
 	</string>
+	<string id="options_disconnect_when_lost_signal">
+		<eng>Disconnect on blowout or when underground</eng>
+		<rus>Отключение при выбросе или под землей</rus>
+	</string>
 	<string id="payment_blocked">
 		<eng>Command blocked, please check options.</eng>
 		<rus>Команда заблокирована, проверьте параметры.</rus>
@@ -263,6 +271,18 @@ You can join the official Discord server in the Options menu!</eng>
 	<string id="options_chat_key_change">
 		<eng>Change</eng>
 		<rus>Изменить</rus>
+	</string>
+	<string id="options_nick_autocomplete_key_change">
+		<eng>Change</eng>
+		<rus>Изменить</rus>
+	</string>
+	<string id="options_nick_autocomplete_key_label">
+		<eng>Nick AutoComplete Key</eng>
+		<rus>Ник Ключ автозаполнения</rus>
+	</string>
+	<string id="options_unblocking_money_transfer_warning">
+		<eng>By disabling this you risk getting transfers cheated money.</eng>
+		<rus>Отключив это, вы рискуете получить переводы обманутых денег.</rus>
 	</string>
 	<string id="options_news_sound">
 		<eng>Play message sound</eng>

@@ -150,7 +150,7 @@ function CRCPda:load_channel_from_settings(value)
 end
 
 --- called by the edit_box component, when a key is pressed while typing in a textbox. Used to implement keyboard shortcuts when typing a message.
---- ff it returns true the edit_box will exit the edit mode.
+--- if it returns true the edit_box will exit the edit mode.
 --- @param key number
 --- @return boolean
 function CRCPda:handle_edit_key_press(key)
@@ -166,7 +166,29 @@ function CRCPda:handle_edit_key_press(key)
         return true
     end
 
+	if key == crc_config.get().nick_auto_complete_key then
+		self:__complete_nick()
+		return false
+	end
+
 	return false
+end
+
+--- automatically completes the user nickname in @name format inside the edit_box
+function CRCPda:__complete_nick()
+	local text = self.edit_box:get_text()
+    local nick = text:match("@(%w+)")
+
+    if nick then
+        for k, v in pairs(self.users) do
+            if k:lower():find(nick:lower()) then
+                text = text:gsub("@"..nick, "@"..k)
+                self.edit_box:set_text(text)
+				self.edit_box:set_selector_pos(text:len())
+                break
+            end
+        end
+    end
 end
 
 --- scrolls the message list up or down as much as possible depending on the current sorting mode
@@ -391,8 +413,9 @@ end
 function CRCPda:load_users(users)
     self.users = {}
 
-    for k, _, v in users do
-        self.users[k] = v
+    for name, faction, is_in_game in users do
+        self.users[name] = is_in_game
+		crc_pda.get_ui():save_icon(name, crc_user.get_icon(name, faction))
     end
 
     if self:is_open() then

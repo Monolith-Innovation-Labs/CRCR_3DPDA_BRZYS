@@ -10,6 +10,7 @@ namespace Chernobyl_Relay_Chat
     class CRCCommands
     {
         private static readonly Regex commandRx = new Regex(@"^/(\S+)\s*(.*)$");
+        private static readonly Regex userRx = new Regex(@"^@{0,1}([{}\w-]+)$");
 
         private static readonly List<CRCCommand> commands = new List<CRCCommand>()
         {
@@ -61,7 +62,8 @@ namespace Chernobyl_Relay_Chat
 
         private static void SendQuery(List<string> args, ICRCSendable output)
         {
-            CRCClient.SendQuery(args[0], args[1]);
+            Match user_match = userRx.Match(args[0]);
+            CRCClient.SendQuery(user_match.Groups[1].Value, args[1]);
         }
 
         private static void ListBlocked(List<string> args, ICRCSendable output)
@@ -83,7 +85,8 @@ namespace Chernobyl_Relay_Chat
 
         private static void Block(List<string> args, ICRCSendable output)
         {
-            string nick = args[0];
+            Match user_match = userRx.Match(args[0]);
+            string nick = user_match.Groups[1].Value;
             if (CRCOptions.blockListData.ContainsKey(nick))
             {
                 CRCClient.ShowError(String.Format(CRCStrings.Localize("command_block_user_already_on_list"), nick));
@@ -101,7 +104,8 @@ namespace Chernobyl_Relay_Chat
 
         private static void UnBlock(List<string> args, ICRCSendable output)
         {
-            string nick = args[0];
+            Match user_match = userRx.Match(args[0]);
+            string nick = user_match.Groups[1].Value;
             if (CRCOptions.blockListData.ContainsKey(nick))
             {
                 CRCOptions.removeFromList(nick);
@@ -141,7 +145,7 @@ namespace Chernobyl_Relay_Chat
             }
             else
             {
-                CRCClient.SendMoney(args[0], args[1]);
+                CRCClient.SendMoney(userRx.Match(args[0]).Groups[1].Value, args[1]);
             }
         }
 

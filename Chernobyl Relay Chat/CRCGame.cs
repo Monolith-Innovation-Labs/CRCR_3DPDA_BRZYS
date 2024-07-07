@@ -13,7 +13,7 @@ namespace Chernobyl_Relay_Chat
 {
     class CRCGame
     {
-        private const int SCRIPT_VERSION = 7;
+        private const int SCRIPT_VERSION = 8;
         public static bool DEBUG = false;
         public static int ActorMoney = 0;
         public static bool IsInGame = false;
@@ -188,7 +188,7 @@ namespace Chernobyl_Relay_Chat
                     else if (type == "ConnLost")
                     {
                         Match connLostMatch = connLostRx.Match(typeMatch.Groups[2].Value);
-                        if (connLostMatch.Groups[1].Value == "true" && FakeConnLost == false)
+                        if (connLostMatch.Groups[1].Value == "true" && FakeConnLost == false && CRCOptions.DisconnectWhenBlowoutOrUnderground)
                         {
                             CRCClient.OnSignalLost(connLostMatch.Groups[2].Value);
                             FakeConnLost = true;
@@ -247,8 +247,10 @@ namespace Chernobyl_Relay_Chat
         {
             SendToGame("Setting/NewsDuration/" + (CRCOptions.NewsDuration * 1000));
             SendToGame("Setting/ChatKey/DIK_" + CRCOptions.ChatKey);
+            SendToGame("Setting/NickAutoCompleteKey/DIK_" + CRCOptions.NickAutoCompleteKey);
             SendToGame("Setting/NewsSound/" + CRCOptions.NewsSound);
             SendToGame("Setting/CloseChat/" + CRCOptions.CloseChat);
+            SendToGame("Setting/DisconnectWhenBlowoutOrUnderground/" + CRCOptions.DisconnectWhenBlowoutOrUnderground);
             SendToGame("Setting/ActorStatus/Get");
             SendToGame("Setting/Channel/" + ChannelConvertToGame());
         }

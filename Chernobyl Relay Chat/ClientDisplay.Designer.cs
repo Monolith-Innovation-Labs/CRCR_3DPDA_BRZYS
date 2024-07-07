@@ -1,4 +1,6 @@
-﻿namespace Chernobyl_Relay_Chat
+﻿using System.Windows.Forms;
+
+namespace Chernobyl_Relay_Chat
 {
     partial class ClientDisplay
     {
@@ -53,13 +55,17 @@
             // textBoxInput
             // 
             resources.ApplyResources(this.textBoxInput, "textBoxInput");
+            this.textBoxInput.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.textBoxInput.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
             this.textBoxInput.Name = "textBoxInput";
+            this.textBoxInput.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.textBoxInput_PreviewKeyDown);
             // 
             // buttonSend
             // 
             resources.ApplyResources(this.buttonSend, "buttonSend");
             this.buttonSend.Name = "buttonSend";
             this.buttonSend.UseVisualStyleBackColor = true;
+            this.buttonSend.TabStopChanged += new System.EventHandler(this.buttonSend_Click);
             this.buttonSend.Click += new System.EventHandler(this.buttonSend_Click);
             // 
             // timerGameCheck

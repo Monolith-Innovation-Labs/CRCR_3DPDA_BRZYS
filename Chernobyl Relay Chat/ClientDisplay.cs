@@ -4,6 +4,10 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Web;
+using System.Linq;
+using System.Collections.ObjectModel;
+using Meebey.SmartIrc4net;
 
 namespace Chernobyl_Relay_Chat
 {
@@ -11,6 +15,7 @@ namespace Chernobyl_Relay_Chat
     {
         private Font mainFont, boldFont, timeFont;
         public static ClientDisplay staticVar = null;
+        public List<string> nicknames = new List<string>();
 
         public ClientDisplay()
         {
@@ -21,6 +26,13 @@ namespace Chernobyl_Relay_Chat
             buttonOptions.Text = CRCStrings.Localize("display_options");
             CRCClient.lastChannel = CRCOptions.ChannelProxy();
             comboBoxChannel.SelectedIndex = channelToIndex[CRCOptions.Channel];
+
+            textBoxInput.TabStop = true;
+            buttonOptions.TabStop = false;
+            textBoxUsers.TabStop = false;
+            buttonSend.TabStop = false;
+            comboBoxChannel.TabStop = false;
+            richTextBoxMessages.TabStop = false;
         }
 
         private void ClientDisplay_Load(object sender, EventArgs e)
@@ -260,12 +272,12 @@ namespace Chernobyl_Relay_Chat
 
         public void UpdateUsers(Dictionary<string, Userdata> users)
         {
+            //inputBoxAutoComplete.Clear();
+            nicknames.Clear();
+            nicknames.AddRange(users.Keys);
+            nicknames.Sort();
             Invoke(() =>
             {
-                var nicknames = new List<string>();
-                foreach (string user in users.Keys)
-                    nicknames.Add(user);
-                nicknames.Sort();
                 textBoxUsers.Text = string.Join("\r\n", nicknames);
             });
         }
@@ -273,6 +285,48 @@ namespace Chernobyl_Relay_Chat
         private void Invoke(Action action)
         {
             base.Invoke(action);
+        }
+
+
+        private void textBoxInput_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyData == Keys.Tab && textBoxInput.Lines.Any())
+            {
+                textBoxInput.Focus();
+                int cursorPosition = textBoxInput.SelectionStart;
+                int nextSpace = textBoxInput.Text.IndexOf(' ', cursorPosition);
+                int selectionStart = 0;
+                string trimmedString = string.Empty;
+                if (nextSpace != -1)
+                {
+                    trimmedString = textBoxInput.Text.Substring(0, nextSpace);
+                }
+                else
+                {
+                    trimmedString = textBoxInput.Text;
+                }
+
+
+                if (trimmedString.LastIndexOf(' ') != -1)
+                {
+                    selectionStart = 1 + trimmedString.LastIndexOf(' ');
+                    trimmedString = trimmedString.Substring(1 + trimmedString.LastIndexOf(' '));
+                }
+                if (!trimmedString.StartsWith("@"))
+                {
+                    return;
+                }
+                foreach (string nick in nicknames)
+                {
+                    if (nick.StartsWith(trimmedString.Substring(1, trimmedString.Length - 1), StringComparison.OrdinalIgnoreCase))
+                    {
+                        textBoxInput.SelectionStart = selectionStart;
+                        textBoxInput.SelectionLength = trimmedString.Length;
+                        textBoxInput.SelectedText = "@" + nick;
+                        break;
+                    }
+                }
+            }
         }
 
         private readonly Dictionary<string, int> channelToIndex = new Dictionary<string, int>()

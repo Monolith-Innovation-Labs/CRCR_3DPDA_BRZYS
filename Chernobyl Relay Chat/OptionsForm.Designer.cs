@@ -55,6 +55,7 @@
             this.buttonChatKey = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPageClient = new System.Windows.Forms.TabPage();
+            this.checkBoxDisconnectWhenLostSignal = new System.Windows.Forms.CheckBox();
             this.checkBoxBlockPayment = new System.Windows.Forms.CheckBox();
             this.checkBoxDisableUnregisteredMessage = new System.Windows.Forms.CheckBox();
             this.labelPassword = new System.Windows.Forms.Label();
@@ -66,6 +67,9 @@
             this.checkBoxCloseChat = new System.Windows.Forms.CheckBox();
             this.checkBoxNewsSound = new System.Windows.Forms.CheckBox();
             this.pictureBoxDiscordLogo = new System.Windows.Forms.PictureBox();
+            this.nickAutoCompleteButton = new System.Windows.Forms.Button();
+            this.nickAutoCompleteTextBox = new System.Windows.Forms.TextBox();
+            this.nickAutoCompleteKeyLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDeath)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownNewsDuration)).BeginInit();
             this.tabControl1.SuspendLayout();
@@ -76,7 +80,7 @@
             // 
             // buttonOK
             // 
-            this.buttonOK.Location = new System.Drawing.Point(146, 454);
+            this.buttonOK.Location = new System.Drawing.Point(146, 466);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(75, 23);
             this.buttonOK.TabIndex = 0;
@@ -87,7 +91,7 @@
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(227, 454);
+            this.buttonCancel.Location = new System.Drawing.Point(227, 466);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 1;
@@ -145,7 +149,7 @@
             // checkBoxDeathSend
             // 
             this.checkBoxDeathSend.AutoSize = true;
-            this.checkBoxDeathSend.Location = new System.Drawing.Point(6, 291);
+            this.checkBoxDeathSend.Location = new System.Drawing.Point(6, 300);
             this.checkBoxDeathSend.Name = "checkBoxDeathSend";
             this.checkBoxDeathSend.Size = new System.Drawing.Size(131, 17);
             this.checkBoxDeathSend.TabIndex = 7;
@@ -155,7 +159,7 @@
             // checkBoxDeathReceive
             // 
             this.checkBoxDeathReceive.AutoSize = true;
-            this.checkBoxDeathReceive.Location = new System.Drawing.Point(6, 314);
+            this.checkBoxDeathReceive.Location = new System.Drawing.Point(6, 323);
             this.checkBoxDeathReceive.Name = "checkBoxDeathReceive";
             this.checkBoxDeathReceive.Size = new System.Drawing.Size(146, 17);
             this.checkBoxDeathReceive.TabIndex = 8;
@@ -188,7 +192,7 @@
             // 
             // numericUpDownDeath
             // 
-            this.numericUpDownDeath.Location = new System.Drawing.Point(6, 377);
+            this.numericUpDownDeath.Location = new System.Drawing.Point(6, 386);
             this.numericUpDownDeath.Maximum = new decimal(new int[] {
             3600,
             0,
@@ -202,7 +206,7 @@
             // labelDeathInterval
             // 
             this.labelDeathInterval.AutoSize = true;
-            this.labelDeathInterval.Location = new System.Drawing.Point(6, 361);
+            this.labelDeathInterval.Location = new System.Drawing.Point(6, 370);
             this.labelDeathInterval.Name = "labelDeathInterval";
             this.labelDeathInterval.Size = new System.Drawing.Size(194, 13);
             this.labelDeathInterval.TabIndex = 12;
@@ -211,7 +215,7 @@
             // labelDeathSeconds
             // 
             this.labelDeathSeconds.AutoSize = true;
-            this.labelDeathSeconds.Location = new System.Drawing.Point(58, 379);
+            this.labelDeathSeconds.Location = new System.Drawing.Point(58, 388);
             this.labelDeathSeconds.Name = "labelDeathSeconds";
             this.labelDeathSeconds.Size = new System.Drawing.Size(47, 13);
             this.labelDeathSeconds.TabIndex = 13;
@@ -220,7 +224,7 @@
             // label4
             // 
             this.label4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.label4.Location = new System.Drawing.Point(6, 217);
+            this.label4.Location = new System.Drawing.Point(7, 203);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(280, 2);
             this.label4.TabIndex = 14;
@@ -228,7 +232,7 @@
             // checkBoxTimestamps
             // 
             this.checkBoxTimestamps.AutoSize = true;
-            this.checkBoxTimestamps.Location = new System.Drawing.Point(6, 268);
+            this.checkBoxTimestamps.Location = new System.Drawing.Point(6, 277);
             this.checkBoxTimestamps.Name = "checkBoxTimestamps";
             this.checkBoxTimestamps.Size = new System.Drawing.Size(108, 17);
             this.checkBoxTimestamps.TabIndex = 15;
@@ -244,7 +248,7 @@
             this.linkLabelDiscord.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.linkLabelDiscord.AutoSize = true;
             this.linkLabelDiscord.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
-            this.linkLabelDiscord.Location = new System.Drawing.Point(38, 459);
+            this.linkLabelDiscord.Location = new System.Drawing.Point(38, 471);
             this.linkLabelDiscord.Name = "linkLabelDiscord";
             this.linkLabelDiscord.Size = new System.Drawing.Size(98, 13);
             this.linkLabelDiscord.TabIndex = 27;
@@ -256,7 +260,7 @@
             // labelNewsDuration
             // 
             this.labelNewsDuration.AutoSize = true;
-            this.labelNewsDuration.Location = new System.Drawing.Point(6, 88);
+            this.labelNewsDuration.Location = new System.Drawing.Point(6, 132);
             this.labelNewsDuration.Name = "labelNewsDuration";
             this.labelNewsDuration.Size = new System.Drawing.Size(137, 13);
             this.labelNewsDuration.TabIndex = 17;
@@ -264,7 +268,7 @@
             // 
             // numericUpDownNewsDuration
             // 
-            this.numericUpDownNewsDuration.Location = new System.Drawing.Point(6, 104);
+            this.numericUpDownNewsDuration.Location = new System.Drawing.Point(6, 148);
             this.numericUpDownNewsDuration.Maximum = new decimal(new int[] {
             60,
             0,
@@ -289,7 +293,7 @@
             // labelNewsSeconds
             // 
             this.labelNewsSeconds.AutoSize = true;
-            this.labelNewsSeconds.Location = new System.Drawing.Point(58, 106);
+            this.labelNewsSeconds.Location = new System.Drawing.Point(58, 150);
             this.labelNewsSeconds.Name = "labelNewsSeconds";
             this.labelNewsSeconds.Size = new System.Drawing.Size(47, 13);
             this.labelNewsSeconds.TabIndex = 19;
@@ -329,11 +333,12 @@
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(300, 436);
+            this.tabControl1.Size = new System.Drawing.Size(300, 448);
             this.tabControl1.TabIndex = 25;
             // 
             // tabPageClient
             // 
+            this.tabPageClient.Controls.Add(this.checkBoxDisconnectWhenLostSignal);
             this.tabPageClient.Controls.Add(this.checkBoxBlockPayment);
             this.tabPageClient.Controls.Add(this.checkBoxDisableUnregisteredMessage);
             this.tabPageClient.Controls.Add(this.labelPassword);
@@ -357,15 +362,25 @@
             this.tabPageClient.Location = new System.Drawing.Point(4, 22);
             this.tabPageClient.Name = "tabPageClient";
             this.tabPageClient.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageClient.Size = new System.Drawing.Size(292, 410);
+            this.tabPageClient.Size = new System.Drawing.Size(292, 422);
             this.tabPageClient.TabIndex = 0;
             this.tabPageClient.Text = "Client";
             this.tabPageClient.UseVisualStyleBackColor = true;
             // 
+            // checkBoxDisconnectWhenLostSignal
+            // 
+            this.checkBoxDisconnectWhenLostSignal.AutoSize = true;
+            this.checkBoxDisconnectWhenLostSignal.Location = new System.Drawing.Point(6, 208);
+            this.checkBoxDisconnectWhenLostSignal.Name = "checkBoxDisconnectWhenLostSignal";
+            this.checkBoxDisconnectWhenLostSignal.Size = new System.Drawing.Size(239, 17);
+            this.checkBoxDisconnectWhenLostSignal.TabIndex = 25;
+            this.checkBoxDisconnectWhenLostSignal.Text = "Disconnect on blowout or when underground";
+            this.checkBoxDisconnectWhenLostSignal.UseVisualStyleBackColor = true;
+            // 
             // checkBoxBlockPayment
             // 
             this.checkBoxBlockPayment.AutoSize = true;
-            this.checkBoxBlockPayment.Location = new System.Drawing.Point(6, 222);
+            this.checkBoxBlockPayment.Location = new System.Drawing.Point(6, 231);
             this.checkBoxBlockPayment.Name = "checkBoxBlockPayment";
             this.checkBoxBlockPayment.Size = new System.Drawing.Size(221, 17);
             this.checkBoxBlockPayment.TabIndex = 24;
@@ -375,7 +390,7 @@
             // checkBoxDisableUnregisteredMessage
             // 
             this.checkBoxDisableUnregisteredMessage.AutoSize = true;
-            this.checkBoxDisableUnregisteredMessage.Location = new System.Drawing.Point(6, 245);
+            this.checkBoxDisableUnregisteredMessage.Location = new System.Drawing.Point(6, 254);
             this.checkBoxDisableUnregisteredMessage.Name = "checkBoxDisableUnregisteredMessage";
             this.checkBoxDisableUnregisteredMessage.Size = new System.Drawing.Size(219, 17);
             this.checkBoxDisableUnregisteredMessage.TabIndex = 23;
@@ -402,7 +417,7 @@
             // checkBoxSoundToggle
             // 
             this.checkBoxSoundToggle.AutoSize = true;
-            this.checkBoxSoundToggle.Location = new System.Drawing.Point(6, 337);
+            this.checkBoxSoundToggle.Location = new System.Drawing.Point(6, 346);
             this.checkBoxSoundToggle.Name = "checkBoxSoundToggle";
             this.checkBoxSoundToggle.Size = new System.Drawing.Size(116, 17);
             this.checkBoxSoundToggle.TabIndex = 20;
@@ -433,6 +448,9 @@
             // 
             // tabPageGame
             // 
+            this.tabPageGame.Controls.Add(this.nickAutoCompleteButton);
+            this.tabPageGame.Controls.Add(this.nickAutoCompleteTextBox);
+            this.tabPageGame.Controls.Add(this.nickAutoCompleteKeyLabel);
             this.tabPageGame.Controls.Add(this.checkBoxCloseChat);
             this.tabPageGame.Controls.Add(this.checkBoxNewsSound);
             this.tabPageGame.Controls.Add(this.labelNewsDuration);
@@ -444,7 +462,7 @@
             this.tabPageGame.Location = new System.Drawing.Point(4, 22);
             this.tabPageGame.Name = "tabPageGame";
             this.tabPageGame.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageGame.Size = new System.Drawing.Size(292, 410);
+            this.tabPageGame.Size = new System.Drawing.Size(292, 422);
             this.tabPageGame.TabIndex = 1;
             this.tabPageGame.Text = "In-game";
             this.tabPageGame.UseVisualStyleBackColor = true;
@@ -452,7 +470,7 @@
             // checkBoxCloseChat
             // 
             this.checkBoxCloseChat.AutoSize = true;
-            this.checkBoxCloseChat.Location = new System.Drawing.Point(6, 45);
+            this.checkBoxCloseChat.Location = new System.Drawing.Point(6, 89);
             this.checkBoxCloseChat.Name = "checkBoxCloseChat";
             this.checkBoxCloseChat.Size = new System.Drawing.Size(140, 17);
             this.checkBoxCloseChat.TabIndex = 26;
@@ -462,7 +480,7 @@
             // checkBoxNewsSound
             // 
             this.checkBoxNewsSound.AutoSize = true;
-            this.checkBoxNewsSound.Location = new System.Drawing.Point(6, 68);
+            this.checkBoxNewsSound.Location = new System.Drawing.Point(6, 112);
             this.checkBoxNewsSound.Name = "checkBoxNewsSound";
             this.checkBoxNewsSound.Size = new System.Drawing.Size(123, 17);
             this.checkBoxNewsSound.TabIndex = 25;
@@ -473,12 +491,39 @@
             // 
             this.pictureBoxDiscordLogo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.pictureBoxDiscordLogo.Image = global::Chernobyl_Relay_Chat.Properties.Resources.discord_icon_200x200;
-            this.pictureBoxDiscordLogo.Location = new System.Drawing.Point(10, 454);
+            this.pictureBoxDiscordLogo.Location = new System.Drawing.Point(10, 466);
             this.pictureBoxDiscordLogo.Name = "pictureBoxDiscordLogo";
             this.pictureBoxDiscordLogo.Size = new System.Drawing.Size(32, 23);
             this.pictureBoxDiscordLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxDiscordLogo.TabIndex = 26;
             this.pictureBoxDiscordLogo.TabStop = false;
+            // 
+            // nickAutoCompleteButton
+            // 
+            this.nickAutoCompleteButton.Location = new System.Drawing.Point(211, 61);
+            this.nickAutoCompleteButton.Name = "nickAutoCompleteButton";
+            this.nickAutoCompleteButton.Size = new System.Drawing.Size(75, 23);
+            this.nickAutoCompleteButton.TabIndex = 29;
+            this.nickAutoCompleteButton.Text = "Change";
+            this.nickAutoCompleteButton.UseVisualStyleBackColor = true;
+            this.nickAutoCompleteButton.Click += new System.EventHandler(this.nickAutoCompleteButton_Click);
+            // 
+            // nickAutoCompleteTextBox
+            // 
+            this.nickAutoCompleteTextBox.Location = new System.Drawing.Point(6, 63);
+            this.nickAutoCompleteTextBox.Name = "nickAutoCompleteTextBox";
+            this.nickAutoCompleteTextBox.ReadOnly = true;
+            this.nickAutoCompleteTextBox.Size = new System.Drawing.Size(199, 20);
+            this.nickAutoCompleteTextBox.TabIndex = 28;
+            // 
+            // nickAutoCompleteKeyLabel
+            // 
+            this.nickAutoCompleteKeyLabel.AutoSize = true;
+            this.nickAutoCompleteKeyLabel.Location = new System.Drawing.Point(6, 47);
+            this.nickAutoCompleteKeyLabel.Name = "nickAutoCompleteKeyLabel";
+            this.nickAutoCompleteKeyLabel.Size = new System.Drawing.Size(118, 13);
+            this.nickAutoCompleteKeyLabel.TabIndex = 27;
+            this.nickAutoCompleteKeyLabel.Text = "Nick AutoComplete key";
             // 
             // OptionsForm
             // 
@@ -486,7 +531,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(324, 489);
+            this.ClientSize = new System.Drawing.Size(324, 501);
             this.Controls.Add(this.linkLabelDiscord);
             this.Controls.Add(this.pictureBoxDiscordLogo);
             this.Controls.Add(this.tabControl1);
@@ -494,9 +539,9 @@
             this.Controls.Add(this.buttonOK);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(340, 528);
+            this.MaximumSize = new System.Drawing.Size(340, 540);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(340, 528);
+            this.MinimumSize = new System.Drawing.Size(340, 540);
             this.Name = "OptionsForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -553,5 +598,9 @@
         private System.Windows.Forms.TextBox textBoxPassword;
         private System.Windows.Forms.CheckBox checkBoxDisableUnregisteredMessage;
         private System.Windows.Forms.CheckBox checkBoxBlockPayment;
+        private System.Windows.Forms.CheckBox checkBoxDisconnectWhenLostSignal;
+        private System.Windows.Forms.Button nickAutoCompleteButton;
+        private System.Windows.Forms.TextBox nickAutoCompleteTextBox;
+        private System.Windows.Forms.Label nickAutoCompleteKeyLabel;
     }
 }

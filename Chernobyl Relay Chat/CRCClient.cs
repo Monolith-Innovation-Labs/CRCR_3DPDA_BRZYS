@@ -93,8 +93,7 @@ namespace Chernobyl_Relay_Chat
         {
             ShowInformation(String.Format(CRCStrings.Localize("try_identify_as"), nickBeforeRecover));
             client.SendMessage(SendType.Message, "NickServ", "IDENTIFY " + CRCOptions.Password);
-            CRCOptions.Name = nickBeforeRecover;
-         
+            CRCOptions.Name = nickBeforeRecover; 
         }
 
         public static void Stop()
@@ -206,7 +205,7 @@ namespace Chernobyl_Relay_Chat
                 CRCClient.ShowError(String.Format(CRCStrings.Localize("user_is_blocked"), nick));
                 return;
             }
-            if (CRCOptions.BlockPayments)
+            if (CRCOptions.BlockMoneyTransfer)
             {
                 ShowError(CRCStrings.Localize("payment_blocked"));
                 return;
@@ -445,6 +444,7 @@ namespace Chernobyl_Relay_Chat
                 if (!userData.ContainsKey(user.Nick))
                     userData.Add(user.Nick, new Userdata { User = user.Nick, Faction = "actor_anonymous", IsInGame = "False" });
             }
+
             client.SendMessage(SendType.CtcpRequest, e.Data.Channel, "USERDATA");
             client.SendMessage(SendType.CtcpReply, e.Data.Channel, "AMOGUS " + UserDataUpdate());
             prevChannel = CRCOptions.Channel;
@@ -565,7 +565,7 @@ namespace Chernobyl_Relay_Chat
             string nick = e.Data.Nick;
             if (recvMoney.Success)
             {
-                if (CRCOptions.BlockPayments)
+                if (CRCOptions.BlockMoneyTransfer)
                 {
                     return;
                 }

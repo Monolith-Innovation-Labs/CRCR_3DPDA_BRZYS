@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Chernobyl Relay Chat Rebirth")]
-[assembly: AssemblyDescription("IRC client for Anomaly based on the CRC by TKGP")]
+[assembly: AssemblyDescription("IRC client for Anomaly based on the CRCR by Anchorpoint, continued development by 8r2y5")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Chernobyl Relay Chat Rebirth")]
-[assembly: AssemblyCopyright("Copyright ©  2022")]
+[assembly: AssemblyCopyright("Copyright ©  2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.7.1")]
-[assembly: AssemblyFileVersion("0.7.1")]
+[assembly: AssemblyVersion("0.8.0")]
+[assembly: AssemblyFileVersion("0.8.0")]

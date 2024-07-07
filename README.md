@@ -69,7 +69,6 @@ nixx quality: GitHubUpdate
   
 av661194, OWL, XMODER, Anchorpoint: Russian translation  
 Rebirth changes: Anchorpoint  
-PDA Integration AmonDeShir
-Compatibility with non-US keyboard layouts: AmonDeShir
-
-Proofreading: KӊҷЪϵґ <λ>
+PDA Integration AmonDeShir   
+Compatibility with non-US keyboard layouts: AmonDeShir    
+Proofreading: KӊҷЪϵґ <λ>    

@@ -1,7 +1,7 @@
 --| Interface for external application
 --| By TKGP, Anchorpoint, brzys
 
-local SCRIPT_VERSION = 7
+local SCRIPT_VERSION = 8
 
 -- Constants
 local UPDATE_INTERVAL = 250

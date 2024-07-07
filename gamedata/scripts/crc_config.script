@@ -6,9 +6,12 @@ local MAX_VALUE = 2^1023
 --- default configuration
 local config = {
 	chat_key = DIK_keys.DIK_HOME,
+	nick_auto_complete_key = DIK_keys.DIK_TAB,
 	news_duration = 10000,
 	news_sound = true,
-	close_chat = true,
+	close_chat = false,
+	disconnect_on_blowout = true,
+	disconnect_when_underground = true,
 	max_messages_size = 50,
 	keyboard_layout = 1,
 	keyboard_layout_cyrillic = 1,
@@ -80,9 +83,12 @@ keyboard_layouts_cyrillic = {
 local mcm_config = {
 	id = "crc", sh = true, gr = {
 		{id = "chat_key", type = "key_bind", val = 2, def = config.chat_key},
+		{id = "nick_auto_complete_key", type = "key_bind", val = 2, def = config.nick_auto_complete_key},
 		{id = "news_duration", type = "input", val = 2, def = config.news_duration,  min = 0, max=MAX_VALUE},
 		{id = "news_sound", type = "check", val = 1, def = config.news_sound},
 		{id = "close_chat", type = "check", val = 1, def = config.close_chat},
+		{id = "disconnect_on_blowout", type = "check", val = 1, def = config.disconnect_on_blowout},
+		{id = "disconnect_when_underground", type = "check", val = 1, def = config.disconnect_when_underground},
 		{id = "max_messages_size", type = "input", val = 2, def = config.max_messages_size, min = 0, max=MAX_VALUE},
 		{id = "keyboard_layout", type = "list", val = 2, content = keyboard_layouts, def = config.keyboard_layout},
 		{id = "keyboard_layout_cyrillic", type = "list", val = 2, content = keyboard_layouts_cyrillic, def = config.keyboard_layout_cyrillic},
@@ -122,6 +128,13 @@ function load_settings_from_exe_app(message)
 
 		elseif setting == "CloseChat" then
 			set('close_chat', value == "True")
+
+		elseif setting == "NickAutoCompleteKey" then
+			set('nick_auto_complete_key', DIK_keys[value])
+
+		elseif setting == "DisconnectWhenBlowoutOrUnderground" then
+			set('disconnect_on_blowout', value == "True")
+			set('disconnect_when_underground', value == "True")
 		end
 	end
 end

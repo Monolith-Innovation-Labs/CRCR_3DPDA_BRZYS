@@ -172,6 +172,10 @@
 		<text>Open/Close chat button</text>
 	</string>
 
+	<string id="ui_mcm_crc_nick_auto_complete_key">
+		<text>Nick AutoComplete button</text>
+	</string>
+
 	<string id="ui_mcm_crc_news_duration">
 		<text>How long the message will be displayed</text>
 	</string>
@@ -188,7 +192,13 @@
 		<text>Save last messages</text>
 	</string>
 
-
+	<string id="ui_mcm_crc_disconnect_when_underground">
+		<text>Disconnect when underground</text>
+	</string>
+	
+	<string id="ui_mcm_crc_disconnect_on_blowout">
+		<text>Disconnect on blowout</text>
+	</string>
 
 	<string id="ui_mcm_crc_keyboard_layout">
 		<text>Keyboard layout (QWERTY)</text>

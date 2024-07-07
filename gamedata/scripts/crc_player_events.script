@@ -22,11 +22,11 @@ end
 --- Returns true if the player should lose connection to the CRCR, along with the reason
 --- @return boolean, string
 function is_connection_lost()
-	if level_weathers.bLevelUnderground then
+	if level_weathers.bLevelUnderground and crc_config.get().disconnect_when_underground then
 		return true, "Underground"
 	end
 
-	if xr_conditions.surge_started() then
+	if xr_conditions.surge_started() and crc_config.get().disconnect_on_blowout then
 		return true, "Surge"
 	end
 

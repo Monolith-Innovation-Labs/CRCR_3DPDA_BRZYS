@@ -90,7 +90,7 @@ end
 ---@param diff diff[]
 ---@return diff[]
 local function define_functions_in_module(module, text, diff)
-    for name in text:gmatch("[\r\n]function%s+([a-zA-Z_][%w_]*)") do
+    for name in text:gmatch("[\r\n]function%s+([a-zA-Z_][%w_]*)%s*%(") do
         diff[#diff+1] = {
             text = string.format("\n%s.%s = %s", module, name, name),
             start = text:len() + 1,
@@ -101,6 +101,79 @@ local function define_functions_in_module(module, text, diff)
     return diff
 end
 
+---@param module string
+---@param text string
+---@param diff diff[]
+---@return diff[]
+local function define_class(module, text, diff)
+    for start, name, finish in text:gmatch("[\r\n]()class%s*\"([a-zA-Z_][%w_]*)\"()%s*\n") do
+        diff[#diff+1] = {
+            text = string.format("---@class %s\n", name),
+            start = start,
+            finish = finish,
+        }
+
+        for c_start, c_args, c_finish in text:gmatch("[\r\n]()%s*function%s+" .. name .. "%s*:%s*__init%s*%(([a-zA-Z_,%s]*)%)[^\n]*()") do
+            local args = c_args:len() == 0 and 'self' or 'self, ' .. c_args
+
+            diff[#diff+1] = {
+                text = string.format("function %s(%s) end\n\n", name, args),
+                start = c_start,
+                finish = c_finish,
+            }
+
+            diff[#diff+1] = {
+                text = string.format("function %s:__constructor(%s)\n", name, c_args),
+                start = c_finish+1,
+                finish = c_finish,
+            }
+        end
+
+        diff[#diff+1] = {
+            text = string.format("\n%s.%s = %s", module, name, name),
+            start = text:len() + 1,
+            finish = text:len(),
+        }
+    end
+
+    return diff
+end
+
+---@param module string
+---@param text string
+---@param diff diff[]
+---@return diff[]
+local function define_class_with_inheritance(module, text, diff)
+    for start, name, parent, finish in text:gmatch("[\r\n]()class%s*\"([a-zA-Z_][%w_]*)\"%s*%(%s*([a-zA-Z_]+)%s*%)%s*()\n") do
+        diff[#diff+1] = {
+            text = string.format("---@class %s : %s\n", name, parent),
+            start = start,
+            finish = finish,
+        }
+
+        for c_start, c_args, c_finish in text:gmatch("[\r\n]()%s*function%s+" .. name .. "%s*:%s*__init%s*%(([a-zA-Z_,%s]*)%)[^\n]*()") do
+            diff[#diff+1] = {
+                text = string.format("function %s(%s) end\n\n", name, c_args),
+                start = c_start,
+                finish = c_finish,
+            }
+
+            diff[#diff+1] = {
+                text = string.format("function %s:__constructor(%s)\n", name, c_args),
+                start = c_finish+1,
+                finish = c_finish,
+            }
+        end
+
+        diff[#diff+1] = {
+            text = string.format("\n%s.%s = %s", module, name, name),
+            start = text:len() + 1,
+            finish = text:len(),
+        }
+    end
+
+    return diff
+end
 
 ---@class diff
 ---@field start  integer # The number of bytes at the beginning of the replacement
@@ -122,13 +195,8 @@ function OnSetText(uri, text)
     diffs = file_as_global(file_name, text, diffs)
     diffs = define_globals_in_module(file_name, text, diffs)
     diffs = define_functions_in_module(file_name, text, diffs)
+    diffs = define_class(file_name, text, diffs)
+    diffs = define_class_with_inheritance(file_name, text, diffs)
 
     return diffs
-end
-
----@param  uri  string # The uri of file
----@param  ast  parser.object # The file ast
----@return parser.object? ast
-function OnTransformAst(uri, ast)
-
 end

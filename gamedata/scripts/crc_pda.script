@@ -83,6 +83,7 @@ function CRCPda:init_controls()
 	xml:InitFrame("frame2", self)
 	xml:InitFrame("frame3", self)
 
+	--- @type CRCList
 	self.list_channel = crc_list.CRCList(xml, 'list_channel', self)
 	self.list_channel.on_select = function(id) self:on_select_channel(id) end
     self:__init_channel_list()

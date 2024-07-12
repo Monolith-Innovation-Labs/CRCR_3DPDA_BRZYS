@@ -2,11 +2,10 @@
 --| By Amon
 
 --- Simple select component
-class "CRCList"
-
 --- @param xml CScriptXmlInit
 --- @param xml_tag string
 --- @param parent CUIScriptWnd
+class "CRCList"
 function CRCList:__init(xml, xml_tag, parent)
     self.parent = parent
     self.xml = xml

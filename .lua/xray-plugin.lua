@@ -108,16 +108,14 @@ end
 local function define_class(module, text, diff)
     for start, name, finish in text:gmatch("[\r\n]()class%s*\"([a-zA-Z_][%w_]*)\"()%s*\n") do
         diff[#diff+1] = {
-            text = string.format("---@class %s\n", name),
+            text = string.format("---@class %s\n---@diagnostic disable-next-line: unused-local\n", name),
             start = start,
             finish = finish,
         }
 
         for c_start, c_args, c_finish in text:gmatch("[\r\n]()%s*function%s+" .. name .. "%s*:%s*__init%s*%(([a-zA-Z_,%s]*)%)[^\n]*()") do
-            local args = c_args:len() == 0 and 'self' or 'self, ' .. c_args
-
             diff[#diff+1] = {
-                text = string.format("function %s(%s) end\n\n", name, args),
+                text = string.format("function %s(%s) end\n\n", name, c_args),
                 start = c_start,
                 finish = c_finish,
             }
@@ -146,7 +144,7 @@ end
 local function define_class_with_inheritance(module, text, diff)
     for start, name, parent, finish in text:gmatch("[\r\n]()class%s*\"([a-zA-Z_][%w_]*)\"%s*%(%s*([a-zA-Z_]+)%s*%)%s*()\n") do
         diff[#diff+1] = {
-            text = string.format("---@class %s : %s\n", name, parent),
+            text = string.format("---@class %s : %s\n---@diagnostic disable-next-line: unused-local\n", name, parent),
             start = start,
             finish = finish,
         }
@@ -187,6 +185,10 @@ function OnSetText(uri, text)
     local file_name, file_extension = get_file_name(uri)
 
     if file_extension ~= '.script' then
+        return nil
+    end
+
+    if file_name .. '.' ..file_extension == 'lua_help.script' then
         return nil
     end
 

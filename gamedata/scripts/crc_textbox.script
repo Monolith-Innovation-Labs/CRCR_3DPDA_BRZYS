@@ -5,7 +5,6 @@
 --- to block keyboard-related actions, such as player movement, when displaying the UI. 
 --- However, this does not work with anything displayed inside the PDA. That's why we need a fake ui for this.
 class "CRCTextboxFakeui" (CUIScriptWnd)
-
 function CRCTextboxFakeui:__init(parent) super()
     self.__parent = parent
 
@@ -44,7 +43,6 @@ end
 --- not to mention not locking keyboard shortcuts while typing, resulting in funny systulations such as the PDA being thrown away while typing a word with the letter 'g'.
 --- This implementation solves these problems.
 class "CRCTextbox"
-
 function CRCTextbox:__init(xml, xml_tag, parent)
     --- CECTextbox is not actually a gui element (it does not inherit under CUIScriptWnd) 
     --- all ui elements and events are registered and added actually to its parent.

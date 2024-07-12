@@ -1,0 +1,5 @@
+{
+    "runtime": {
+        "plugin": "./.lua/xray-plugin.lua"
+    }
+}

@@ -28,6 +28,8 @@ end
 ---@param diff diff[]
 ---@return diff[]
 local function file_as_global(file_name, text, diff)
+    local is_windows = package.config:sub(1, 1) == '\\'
+
     local addition = {
         start  = 1,
         finish = 0,
@@ -50,8 +52,8 @@ local function file_as_global(file_name, text, diff)
             }
 
             diff[#diff+1] = {
-                start = start + line:len() - 1,
-                finish = start + line:len() - 2,
+                start = start + line:len() - (is_windows and 2 or 1),
+                finish = start + line:len() - (is_windows and 3 or 2),
                 text = ' <br>'
             }
 

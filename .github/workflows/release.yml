@@ -57,6 +57,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release.zip
+          asset_path: release.zip/release.zip
           asset_name: 3DPA_integration_brzys.zip
           asset_content_type: application/zip

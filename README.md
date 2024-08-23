@@ -47,7 +47,7 @@ If mod doesn't modify the `pda.set_active_subdialog` function, there shouldn't b
 - [PDA Hacking](https://www.moddb.com/mods/stalker-anomaly/addons/pda-hacking)
 
 ### Patches
-[3D PDA CRCR iTheon PDA Taskboard compatibility patch](https://github.com/Monolith-Innovation-Labs/3d-crcr-itheon-pda-taskboard-compatibility-patch/blob/main/README.md)
+[3D PDA CRCR iTheon PDA Taskboard compatibility patch](https://github.com/Monolith-Innovation-Labs/3d-crcr-itheon-pda-taskboard-compatibility-patch/)
 
 # What's Planned  
 - [x] New In-game chat GUI and (possibly) integrating it in Anomaly's 3D PDA

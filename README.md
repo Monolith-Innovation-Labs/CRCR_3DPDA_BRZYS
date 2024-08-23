@@ -2,8 +2,8 @@
  Chernobyl Relay Chat Rebirth is an IRC-based chat app for Anomaly, originally developed by TKGP for CoC. Features an independent client as well as in-game chat, automatic death messages, and compatibility with all other add-ons.
  This mod integrates it into the Anomaly 3D PDA
 ![image](https://github.com/user-attachments/assets/cafbb53f-d92d-46a2-9971-b48194f3a03d)
-
 ![344320831-04b45b92-644e-4564-befc-dfd8aa57c8e3](https://github.com/user-attachments/assets/677e4de1-1713-43e4-b51f-fc65c104aa06)
+## [Download](https://github.com/Monolith-Innovation-Labs/crcr-3dpda-brzys/releases)
 
 ## Note
 This mod needs an EXE app provided by the original CRCR mod to run.
@@ -47,6 +47,7 @@ If mod doesn't modify the `pda.set_active_subdialog` function, there shouldn't b
 - [PDA Hacking](https://www.moddb.com/mods/stalker-anomaly/addons/pda-hacking)
 
 ### Patches
+[3D PDA CRCR iTheon PDA Taskboard compatibility patch](https://github.com/Monolith-Innovation-Labs/3d-crcr-itheon-pda-taskboard-compatibility-patch/blob/main/README.md)
 
 # What's Planned  
 - [x] New In-game chat GUI and (possibly) integrating it in Anomaly's 3D PDA

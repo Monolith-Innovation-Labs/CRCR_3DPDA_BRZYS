@@ -1,4 +1,4 @@
-# 3DPDA integration for Chernobyl Relay Chat Rebirth, maintained by Brzys
+# 3D PDA integration for Chernobyl Relay Chat Rebirth, maintained by Brzys
  Chernobyl Relay Chat Rebirth is an IRC-based chat app for Anomaly, originally developed by TKGP for CoC. Features an independent client as well as in-game chat, automatic death messages, and compatibility with all other add-ons.
  This mod integrates it into the Anomaly 3D PDA
 ![image](https://github.com/user-attachments/assets/cafbb53f-d92d-46a2-9971-b48194f3a03d)
